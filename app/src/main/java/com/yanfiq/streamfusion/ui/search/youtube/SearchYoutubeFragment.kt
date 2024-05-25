@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.yanfiq.streamfusion.BuildConfig
 import com.yanfiq.streamfusion.R
 import com.yanfiq.streamfusion.data.response.youtube.VideoItem
 import com.yanfiq.streamfusion.data.response.youtube.YouTubeResponse
@@ -36,7 +37,7 @@ class SearchYoutubeFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: VideoAdapter
     private lateinit var viewOfLayout: View
-    private val apiKey = "AIzaSyCIeveSw59h20RI75Bie0F2f0KgaWOFg6E"
+    private val apiKey = BuildConfig.YoutubeApiKey
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
