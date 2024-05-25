@@ -16,7 +16,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-//        buildConfigField("String", "YoutubeApiKey", "\"AIzaSyCIeveSw59h20RI75Bie0F2f0KgaWOFg6E\"")
         buildConfigField("String", "YoutubeApiKey", project.properties["YoutubeApiKey"].toString())
     }
 
