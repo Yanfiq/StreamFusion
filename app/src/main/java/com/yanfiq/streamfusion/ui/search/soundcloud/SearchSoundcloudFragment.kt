@@ -29,6 +29,7 @@ class SearchSoundcloudFragment : Fragment() {
     private var param2: String? = null
     private lateinit var webView: WebView
     private lateinit var viewOfLayout: View
+    private var currentSearch: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,12 +74,12 @@ class SearchSoundcloudFragment : Fragment() {
 
             override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
                 // your code here
-                if(!url.toString().contains("/search?q")) {
+                if(!url.toString().contains("/search/sounds?q")) {
                     val intent = Intent(context, PlaySoundcloudActivity::class.java)
                     intent.putExtra("URL", url)
                     startActivity(intent)
                     Log.d("redirect", "url redirected to another activity")
-                    webView.goBack()
+                    webView.loadUrl(currentSearch)
                 }
                 else{
                     super.doUpdateVisitedHistory(view, url, isReload)
@@ -94,20 +95,25 @@ class SearchSoundcloudFragment : Fragment() {
     }
 
     fun searchSoundCloud(query: String) {
-        val url = "https://soundcloud.com/search?q=${query.replace(" ", "%20")}"
-        webView.loadUrl(url)
+        val url = "https://m.soundcloud.com/search/sounds?q=${query.replace(" ", "%20")}"
+        currentSearch = url
+        webView.loadUrl(currentSearch)
     }
 
     private fun injectJavaScript() {
         val js = """
             (function() {
-                    const elements = document.getElementsByClassName('Header_HeaderPlaceholder__3M8hV');
-                    while(elements.length > 0){
-                        elements[0].parentNode.removeChild(elements[0]);
+                    const searchBarWeb = document.getElementsByClassName('Header_HeaderPlaceholder__3M8hV');
+                    while(searchBarWeb.length > 0){
+                        searchBarWeb[0].parentNode.removeChild(searchBarWeb[0]);
                     }
-                    const elements_2 = document.getElementsByClassName('LayoutWrapper_AppDock__v0yuU');
-                    while(elements_2.length > 0){
-                        elements_2[0].parentNode.removeChild(elements_2[0]);
+                    const bottomNavigationweb = document.getElementsByClassName('LayoutWrapper_AppDock__v0yuU');
+                    while(bottomNavigationweb.length > 0){
+                        bottomNavigationweb[0].parentNode.removeChild(bottomNavigationweb[0]);
+                    }
+                    const tabSearchWeb = document.getElementsByClassName('Tabs_TabNavList__6GhOq');
+                    while(tabSearchWeb.length > 0){
+                        tabSearchWeb[0].parentNode.removeChild(tabSearchWeb[0]);
                     }
             })();
         """

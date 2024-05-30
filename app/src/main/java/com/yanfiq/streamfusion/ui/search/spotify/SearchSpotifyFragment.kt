@@ -1,4 +1,4 @@
-package com.yanfiq.streamfusion.ui.search.youtube
+package com.yanfiq.streamfusion.ui.search.spotify
 
 import android.content.Intent
 import android.os.Bundle
@@ -14,8 +14,13 @@ import com.yanfiq.streamfusion.BuildConfig
 import com.yanfiq.streamfusion.R
 import com.yanfiq.streamfusion.data.response.youtube.VideoItem
 import com.yanfiq.streamfusion.data.response.youtube.YouTubeResponse
+import com.yanfiq.streamfusion.data.retrofit.spotify.SpotifyApi
 import com.yanfiq.streamfusion.data.retrofit.youtube.YouTubeApi
+import com.yanfiq.streamfusion.ui.search.youtube.PlayYoutubeActivity
 import com.yanfiq.streamfusion.ui.youtube.VideoAdapter
+import com.yanfiq.youcloudify.data.response.spotify.SpotifySearchResponse
+import com.yanfiq.youcloudify.data.response.spotify.Track
+import com.yanfiq.youcloudify.data.response.spotify.getSpotifyAccessToken
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -27,18 +32,20 @@ private const val ARG_PARAM2 = "param2"
 
 /**
  * A simple [Fragment] subclass.
- * Use the [SearchYoutubeFragment.newInstance] factory method to
+ * Use the [SearchSpotifyFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class SearchYoutubeFragment : Fragment() {
+class SearchSpotifyFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: VideoAdapter
     private lateinit var viewOfLayout: View
-    private val apiKey = BuildConfig.YoutubeApiKey
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: TrackAdapter
+    private lateinit var accessToken: String
 
+    private val clientId = BuildConfig.SpotifyClientId
+    private val clientSecret = BuildConfig.SpotifyClientSecret
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -51,45 +58,49 @@ class SearchYoutubeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        super.onCreate(savedInstanceState)
+        viewOfLayout = inflater.inflate(R.layout.fragment_search_spotify, container, false)
 
-        viewOfLayout = inflater.inflate(R.layout.fragment_search_youtube, container, false)
-        recyclerView = viewOfLayout.findViewById(R.id.recycler_view_youtube)
+        recyclerView = viewOfLayout.findViewById(R.id.recycler_view_spotify)
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = LinearLayoutManager(context)
 
-        adapter = VideoAdapter(emptyList())
+        adapter = TrackAdapter(emptyList())
         recyclerView.adapter = adapter
+
+
+        getSpotifyAccessToken(clientId, clientSecret) { token ->
+            if (token != null) {
+                accessToken = token
+            } else {
+                Toast.makeText(context, "Failed to get access token", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         return viewOfLayout
     }
 
-    fun searchYouTube(query: String) {
-        YouTubeApi.retrofitService.searchVideos("snippet", query, "video", 20, apiKey)
-            .enqueue(object : Callback<YouTubeResponse> {
-                override fun onResponse(
-                    call: Call<YouTubeResponse>,
-                    response: Response<YouTubeResponse>
-                ) {
+    fun searchSpotify(query: String) {
+        SpotifyApi.service.searchTracks(query, "track", "Bearer $accessToken")
+            .enqueue(object : Callback<SpotifySearchResponse> {
+                override fun onResponse(call: Call<SpotifySearchResponse>, response: Response<SpotifySearchResponse>) {
                     if (response.isSuccessful) {
-                        val videos = response.body()?.items ?: emptyList()
-                        val listVideoAdapter = VideoAdapter(videos)
-                        recyclerView.adapter = listVideoAdapter
-                        listVideoAdapter.setOnItemClickCallback(object :
-                            VideoAdapter.OnItemClickCallback {
-                            override fun onItemClicked(data: VideoItem) {
-                                Toast.makeText(context, data.id.videoId, Toast.LENGTH_SHORT).show()
-                                play(data)
+                        val tracks = response.body()?.tracks?.items ?: emptyList()
+                        adapter = TrackAdapter(tracks)
+                        recyclerView.adapter = adapter
+                        adapter.setOnItemClickCallback(object : TrackAdapter.OnItemClickCallback {
+                            override fun onItemClicked(data: Track) {
+                                Toast.makeText(context, data.name, Toast.LENGTH_SHORT).show()
+                                val spotifyEmbedUrl = "https://open.spotify.com/embed/track/"+data.id
+                                val intent = Intent(context, PlaySpotifyActivity::class.java)
+                                intent.putExtra("SPOTIFY_EMBED_URL", spotifyEmbedUrl)
+                                startActivity(intent)
                             }
                         })
                     }
-                    else{
-                        Log.d("YoutubeSearchFragment", "Response not successful: ${response.errorBody()?.string()}")
-                    }
                 }
 
-                override fun onFailure(call: Call<YouTubeResponse>, t: Throwable) {
-                    Log.d("YoutubeSearchFragment", "API call failed: ${t.message}")
+                override fun onFailure(call: Call<SpotifySearchResponse>, t: Throwable) {
+                    // Handle error
                 }
             })
     }
@@ -107,12 +118,12 @@ class SearchYoutubeFragment : Fragment() {
          *
          * @param param1 Parameter 1.
          * @param param2 Parameter 2.
-         * @return A new instance of fragment SearchYoutubeFragment.
+         * @return A new instance of fragment SearchSpotifyFragment.
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
-            SearchYoutubeFragment().apply {
+            SearchSpotifyFragment().apply {
                 arguments = Bundle().apply {
                     putString(ARG_PARAM1, param1)
                     putString(ARG_PARAM2, param2)
