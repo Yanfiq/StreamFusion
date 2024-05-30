@@ -65,7 +65,7 @@ class SearchYoutubeFragment : Fragment() {
         return viewOfLayout
     }
 
-    public fun searchYouTube(query: String) {
+    fun searchYouTube(query: String) {
         YouTubeApi.retrofitService.searchVideos("snippet", query, "video", apiKey)
             .enqueue(object : Callback<YouTubeResponse> {
                 override fun onResponse(

@@ -4,13 +4,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.yanfiq.streamfusion.ui.search.audius.SearchAudiusFragment
+import com.yanfiq.streamfusion.ui.search.soundcloud.SearchSoundcloudFragment
 import com.yanfiq.streamfusion.ui.search.youtube.SearchYoutubeFragment
 
 class SectionPagerAdapter(activity: FragmentActivity) : FragmentStateAdapter(activity) {
-    private val fragmentList = arrayOfNulls<Fragment>(2)
+    private val fragmentList = arrayOfNulls<Fragment>(3)
 
     override fun getItemCount(): Int {
-        return 2
+        return 3
     }
 
     override fun createFragment(position: Int): Fragment {
@@ -18,6 +19,7 @@ class SectionPagerAdapter(activity: FragmentActivity) : FragmentStateAdapter(act
         when (position) {
             0 -> fragment = SearchAudiusFragment()
             1 -> fragment = SearchYoutubeFragment()
+            2 -> fragment = SearchSoundcloudFragment()
         }
         fragmentList[position] = fragment
         return fragment as Fragment
