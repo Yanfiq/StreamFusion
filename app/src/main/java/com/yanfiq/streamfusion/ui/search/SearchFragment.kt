@@ -15,6 +15,8 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.yanfiq.streamfusion.R
 import com.yanfiq.streamfusion.databinding.FragmentSearchBinding
 import com.yanfiq.streamfusion.ui.search.audius.SearchAudiusFragment
+import com.yanfiq.streamfusion.ui.search.soundcloud.SearchSoundcloudFragment
+import com.yanfiq.streamfusion.ui.search.spotify.SearchSpotifyFragment
 import com.yanfiq.streamfusion.ui.search.youtube.SearchYoutubeFragment
 
 class SearchFragment : Fragment() {
@@ -31,7 +33,7 @@ class SearchFragment : Fragment() {
     private val binding get() = _binding!!
 
     companion object {
-        private val TAB_TITLES = arrayOf("Audius", "YouTube")
+        private val TAB_TITLES = arrayOf("Audius", "Spotify", "SoundCloud", "YouTube")
     }
 
     override fun onCreateView(
@@ -88,7 +90,13 @@ class SearchFragment : Fragment() {
         var fragmentAudius = adapter.getFragment(0) as SearchAudiusFragment
         fragmentAudius.searchAudius(query)
 
-        var fragmentYoutube = adapter.getFragment(1) as SearchYoutubeFragment
+        var fragmentSpotify = adapter.getFragment(1) as SearchSpotifyFragment
+        fragmentSpotify.searchSpotify(query)
+
+        var fragmentSoundcloud = adapter.getFragment(2) as SearchSoundcloudFragment
+        fragmentSoundcloud.searchSoundCloud(query)
+
+        var fragmentYoutube = adapter.getFragment(3) as SearchYoutubeFragment
         fragmentYoutube.searchYouTube(query)
     }
 }

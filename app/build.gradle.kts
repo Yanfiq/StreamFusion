@@ -17,6 +17,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "YoutubeApiKey", project.properties["YoutubeApiKey"].toString())
+        buildConfigField("String", "SpotifyClientId", project.properties["SpotifyClientId"].toString())
+        buildConfigField("String", "SpotifyClientSecret", project.properties["SpotifyClientSecret"].toString())
     }
 
     buildTypes {
