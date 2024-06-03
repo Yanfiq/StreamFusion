@@ -17,17 +17,15 @@ class PlayYoutubeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+//        enableEdgeToEdge()
         setContentView(R.layout.activity_play_youtube)
         videoId = intent.getStringExtra("VIDEO_ID") ?: ""
 
         youTubePlayerView = findViewById(R.id.youtube_player_view)
         lifecycle.addObserver(youTubePlayerView)
 
-        // Use getYouTubePlayerWhenReady method with a lambda
         youTubePlayerView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
             override fun onReady(youTubePlayer: YouTubePlayer) {
-                // Do stuff with the YouTubePlayer instance
                 youTubePlayer.loadVideo(videoId, 0f)
             }
         })

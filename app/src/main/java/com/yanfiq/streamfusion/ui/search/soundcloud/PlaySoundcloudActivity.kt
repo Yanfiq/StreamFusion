@@ -19,7 +19,7 @@ class PlaySoundcloudActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+//        enableEdgeToEdge()
         setContentView(R.layout.activity_play_soundcloud)
 
         webView = findViewById(R.id.webview_soundcloud_player)
