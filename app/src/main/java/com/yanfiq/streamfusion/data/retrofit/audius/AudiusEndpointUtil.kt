@@ -3,6 +3,7 @@ package com.yanfiq.streamfusion.data.retrofit.audius
 import android.content.Context
 import android.util.Log
 import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
 import com.yanfiq.streamfusion.data.response.audius.AudiusResponse
 import kotlinx.coroutines.Dispatchers
@@ -105,8 +106,10 @@ object AudiusEndpointUtil {
         endpointsFile.writeText(json)
     }
 
+
     private fun parseEndpoints(json: String?): List<String> {
-        return gson.fromJson(json, object : TypeToken<List<String>>() {}.type)
+        val jsonObject = gson.fromJson(json, JsonObject::class.java)
+        return gson.fromJson(jsonObject["data"], object : TypeToken<List<String>>() {}.type)
     }
 
     fun getUsedEndpoint(): String{
@@ -170,23 +173,28 @@ object AudiusEndpointUtil {
 //        return validity
 //    }
 
-    suspend fun fetchEndpoints(context: Context) {
-        withContext(Dispatchers.IO) {
-            val request = Request.Builder()
-                .url("https://api.audius.co")
-                .build()
+    fun fetchEndpoints(context: Context) {
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("https://api.audius.co")
+            .build()
 
-            client.newCall(request).execute().use { response ->
+        client.newCall(request).enqueue(object : okhttp3.Callback {
+            override fun onFailure(call: okhttp3.Call, e: IOException) {
+                Log.e("AudiusEndpointUtil", "Failed to fetch endpoints: ${e.message}")
+            }
+
+            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
                 if (response.isSuccessful) {
                     response.body?.string()?.let { responseBody ->
                         val newEndpoints = parseEndpoints(responseBody)
                         updateEndpoints(context, newEndpoints)
                     }
                 } else {
-                    Log.e("AudiusEndpointUtil", "Unexpected response: ${response}")
+                    Log.d("AudiusEndpointUtil", response.isSuccessful.toString())
                 }
             }
-        }
+        })
     }
 
     fun getApiInstance(): AudiusApiService {
