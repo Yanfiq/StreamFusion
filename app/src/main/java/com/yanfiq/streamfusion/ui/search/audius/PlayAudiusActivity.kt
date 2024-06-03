@@ -42,6 +42,7 @@ class PlayAudiusActivity : AppCompatActivity() {
     private var mediaPlayer: MediaPlayer? = null
     private lateinit var url: String
     private var timer: Timer? = null
+    private var isPaused = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,7 +67,7 @@ class PlayAudiusActivity : AppCompatActivity() {
 
         setupWebView()
 
-        playButton.setOnClickListener { streamAudiusTrack(trackid) }
+        playButton.setOnClickListener { playStream() }
         pauseButton.setOnClickListener { pauseStream() }
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -132,7 +133,7 @@ class PlayAudiusActivity : AppCompatActivity() {
                 ) {
                     if (response.isSuccessful) {
                         val streamUrl = response.raw().request.url.toString()
-                        playStream(streamUrl)
+                        initializeMediaPlayer(streamUrl)
                         Log.d("StreamActivity", streamUrl)
                     } else {
                         Log.e(
@@ -148,8 +149,7 @@ class PlayAudiusActivity : AppCompatActivity() {
         }
     }
 
-    private fun playStream(streamUrl: String) {
-        mediaPlayer?.release()  // Release any previously initialized MediaPlayer
+    private fun initializeMediaPlayer(streamUrl: String) {
         mediaPlayer = MediaPlayer().apply {
             setAudioStreamType(AudioManager.STREAM_MUSIC)
             setDataSource(streamUrl)
@@ -166,6 +166,16 @@ class PlayAudiusActivity : AppCompatActivity() {
         }
     }
 
+    private fun playStream() {
+        if (isPaused) {
+            mediaPlayer?.start()
+            isPaused = false
+            updateSeekBar()
+        } else {
+            streamAudiusTrack(trackid)
+        }
+    }
+
     private fun pauseStream() {
 //        webViewPlayer.evaluateJavascript(
 //            """
@@ -179,6 +189,7 @@ class PlayAudiusActivity : AppCompatActivity() {
         if (mediaPlayer?.isPlaying == true) {
             mediaPlayer?.pause()
             timer?.cancel()
+            isPaused = true
         }
     }
 
