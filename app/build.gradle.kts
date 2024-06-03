@@ -75,6 +75,8 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation(libs.androidx.activity)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

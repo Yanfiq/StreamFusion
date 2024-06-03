@@ -3,11 +3,15 @@ package com.yanfiq.streamfusion
 import android.os.Bundle
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.yanfiq.streamfusion.data.retrofit.audius.AudiusEndpointUtil
 import com.yanfiq.streamfusion.databinding.ActivityMainBinding
+import kotlinx.coroutines.launch
+import androidx.lifecycle.lifecycleScope
 
 class MainActivity : AppCompatActivity() {
 
@@ -31,5 +35,12 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        AudiusEndpointUtil.initialize(this)
+
+        lifecycleScope.launch {
+            AudiusEndpointUtil.fetchEndpoints(this@MainActivity)
+            AudiusEndpointUtil.setUsedEndpoint(this@MainActivity)
+        }
     }
 }

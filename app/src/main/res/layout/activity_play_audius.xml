@@ -23,6 +23,16 @@
         android:scaleType="centerCrop"
         android:paddingBottom="8dp"/>
 
+    <WebView
+        android:id="@+id/webview_audius_player"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
