@@ -26,13 +26,15 @@ class PlaySoundcloudActivity : AppCompatActivity() {
         webView = findViewById(R.id.webview_soundcloud_player)
         setupWebView()
 
-        url_played = intent.getStringExtra("URL")
-        if (url_played != null) {
+        var url_received = intent.getStringExtra("URL")
+        if (url_received != null) {
+            url_played = "https://w.soundcloud.com/player/?url="+url_received.replace("m.soundcloud", "soundcloud")
             webView.loadUrl(url_played!!)
         }
     }
 
     private fun setupWebView() {
+//        webView.getSettings().userAgentString = "Mozilla/5.0 (Linux; U; Android 3.0; en-us; Xoom Build/HRI39) AppleWebKit/534.13 (KHTML, like Gecko) Version/4.0 Safari/534.13"
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
         webView.webViewClient = object : WebViewClient() {
@@ -46,35 +48,44 @@ class PlaySoundcloudActivity : AppCompatActivity() {
                 super.onPageFinished(view, url)
                 injectJavaScript()
             }
-            override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
-                if (url != null) {
-                    if(url_played?.let { url.contains(it) } == false) {
-                        webView.loadUrl(url_played!!)
-                        Log.d("webviewproblem", url+" canceled")
-                    } else{
-                        super.doUpdateVisitedHistory(view, url, isReload)
-                    }
-                }
-            }
+//            override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
+//                if (url != null) {
+//                    if(url_played?.let { url.contains(it) } == false) {
+//                        webView.loadUrl(url_played!!)
+//                        Log.d("webviewproblem", url+" canceled")
+//                    } else{
+//                        super.doUpdateVisitedHistory(view, url, isReload)
+//                    }
+//                }
+//            }
         }
-        webView.webChromeClient = WebChromeClient()
+//        webView.webChromeClient = WebChromeClient()
+        setDesktopMode(webView, true)
     }
 
     private fun injectJavaScript() {
         val js = """
             (function() {
-                    const searchBarWeb = document.getElementsByClassName('Header_HeaderPlaceholder__3M8hV');
-                    while(searchBarWeb.length > 0){
-                        searchBarWeb[0].parentNode.removeChild(searchBarWeb[0]);
+                    const overlay = document.getElementsByClassName('mobilePrestitial g-flex-row-centered g-box-full m-enabled');
+                    while(overlay.length > 0){
+                        overlay[0].parentNode.removeChild(overlay[0]);
                     }
-                    const bottomNavigationweb = document.getElementsByClassName('LayoutWrapper_AppDock__v0yuU');
-                    while(bottomNavigationweb.length > 0){
-                        bottomNavigationweb[0].parentNode.removeChild(bottomNavigationweb[0]);
-                    }
-                    document.querySelector('footer').remove();
             })();
         """
         webView.evaluateJavascript(js, null)
+    }
+
+    private fun setDesktopMode(webView: WebView, enabled: Boolean) {
+        var newUserAgent: String? = webView.settings.userAgentString
+        if (enabled) {
+            newUserAgent = "Mozilla/5.0 (Linux; U; Android 3.0; en-us; Xoom Build/HRI39) AppleWebKit/534.13 (KHTML, like Gecko) Version/4.0 Safari/534.13"
+        }
+        webView.settings.apply {
+            userAgentString = newUserAgent
+            useWideViewPort = enabled
+            loadWithOverviewMode = enabled
+        }
+        webView.reload()
     }
 
     override fun onDestroy() {
