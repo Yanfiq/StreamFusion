@@ -2,6 +2,7 @@ package com.yanfiq.youcloudify.data.response.spotify
 
 import android.util.Base64
 import com.google.gson.Gson
+import com.yanfiq.streamfusion.data.retrofit.spotify.SpotifyAuthResponse
 import okhttp3.Call
 import okhttp3.FormBody
 import okhttp3.OkHttpClient

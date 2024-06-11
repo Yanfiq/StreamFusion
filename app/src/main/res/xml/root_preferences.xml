@@ -1,0 +1,22 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="API's Secrets">
+
+        <EditTextPreference
+            app:key="youtube_api_key"
+            app:title="YouTube API Key"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="spotify_client_id"
+            app:title="Spotify client ID"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="spotify_client_secret"
+            app:title="Spotify client secret"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

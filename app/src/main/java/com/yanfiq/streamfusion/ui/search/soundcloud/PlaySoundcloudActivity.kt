@@ -17,6 +17,7 @@ import com.yanfiq.streamfusion.ui.youtube.VideoAdapter
 class PlaySoundcloudActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
+    private var url_played: String? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //        enableEdgeToEdge()
@@ -25,9 +26,9 @@ class PlaySoundcloudActivity : AppCompatActivity() {
         webView = findViewById(R.id.webview_soundcloud_player)
         setupWebView()
 
-        val url = intent.getStringExtra("URL")
-        if (url != null) {
-            webView.loadUrl(url)
+        url_played = intent.getStringExtra("URL")
+        if (url_played != null) {
+            webView.loadUrl(url_played!!)
         }
     }
 
@@ -45,6 +46,16 @@ class PlaySoundcloudActivity : AppCompatActivity() {
                 super.onPageFinished(view, url)
                 injectJavaScript()
             }
+            override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
+                if (url != null) {
+                    if(url_played?.let { url.contains(it) } == false) {
+                        webView.loadUrl(url_played!!)
+                        Log.d("webviewproblem", url+" canceled")
+                    } else{
+                        super.doUpdateVisitedHistory(view, url, isReload)
+                    }
+                }
+            }
         }
         webView.webChromeClient = WebChromeClient()
     }
@@ -60,6 +71,7 @@ class PlaySoundcloudActivity : AppCompatActivity() {
                     while(bottomNavigationweb.length > 0){
                         bottomNavigationweb[0].parentNode.removeChild(bottomNavigationweb[0]);
                     }
+                    document.querySelector('footer').remove();
             })();
         """
         webView.evaluateJavascript(js, null)

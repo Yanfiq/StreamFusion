@@ -73,7 +73,6 @@ class SearchSoundcloudFragment : Fragment() {
             }
 
             override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
-                // your code here
                 if(!url.toString().contains("/search/sounds?q")) {
                     val intent = Intent(context, PlaySoundcloudActivity::class.java)
                     intent.putExtra("URL", url)

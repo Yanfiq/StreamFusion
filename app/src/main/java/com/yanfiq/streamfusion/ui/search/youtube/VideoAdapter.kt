@@ -8,9 +8,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.yanfiq.streamfusion.R
+import com.yanfiq.streamfusion.data.response.youtube.Video
 import com.yanfiq.streamfusion.data.response.youtube.VideoItem
 
-class VideoAdapter(private var videos: List<VideoItem>) : RecyclerView.Adapter<VideoAdapter.VideoViewHolder>() {
+class VideoAdapter(private var videos: List<Video>) : RecyclerView.Adapter<VideoAdapter.VideoViewHolder>() {
 
     private lateinit var onItemClickCallback: OnItemClickCallback
 
@@ -27,9 +28,9 @@ class VideoAdapter(private var videos: List<VideoItem>) : RecyclerView.Adapter<V
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         val video = videos[position]
-        holder.title.text = video.snippet.title
-        holder.description.text = video.snippet.description
-        Glide.with(holder.thumbnail.context).load(video.snippet.thumbnails.high.url).into(holder.thumbnail)
+        holder.title.text = video.title
+        holder.description.text = video.description
+        Glide.with(holder.thumbnail.context).load(video.thumbnailUrl).into(holder.thumbnail)
 
         // Set click listener
         holder.itemView.setOnClickListener {
@@ -44,6 +45,6 @@ class VideoAdapter(private var videos: List<VideoItem>) : RecyclerView.Adapter<V
     }
 
     interface OnItemClickCallback {
-        fun onItemClicked(data: VideoItem)
+        fun onItemClicked(data: Video)
     }
 }

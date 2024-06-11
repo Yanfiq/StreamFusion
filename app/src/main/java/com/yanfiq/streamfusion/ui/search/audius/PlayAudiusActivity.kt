@@ -92,38 +92,38 @@ class PlayAudiusActivity : AppCompatActivity() {
         webViewPlayer.visibility = INVISIBLE
         webViewPlayer.webViewClient = WebViewClient()
 
-        url = "${AudiusEndpointUtil.getUsedEndpoint()}/v1/tracks/${trackid}/stream?app_name=StreamFusion"
-        Log.d("url_audiusplayer", url)
-        webViewPlayer.loadUrl(url)
+//        url = "${AudiusEndpointUtil.getUsedEndpoint()}/v1/tracks/${trackid}/stream?app_name=StreamFusion"
+//        Log.d("url_audiusplayer", url)
+//        webViewPlayer.loadUrl(url)
 
         webViewPlayer.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
-                webViewPlayer.evaluateJavascript(
-                    """
-                    (function() {
-                        var videoElement = document.querySelector('video');
-                        if (videoElement) {
-                            videoElement.pause()
-                            videoElement.currentTime = 0
-                        }
-                    })();
-                    """.trimIndent(), null
-                )
+//                webViewPlayer.evaluateJavascript(
+//                    """
+//                    (function() {
+//                        var videoElement = document.querySelector('video');
+//                        if (videoElement) {
+//                            videoElement.pause()
+//                            videoElement.currentTime = 0
+//                        }
+//                    })();
+//                    """.trimIndent(), null
+//                )
                 super.onPageFinished(view, url)
             }
         }
     }
 
     private fun streamAudiusTrack(trackId: String) {
-        webViewPlayer.evaluateJavascript(
-            """
-            (function() {
-                var videoElement = document.querySelector('video');
-                if (videoElement) {
-                    videoElement.play()
-                }
-            })();
-            """.trimIndent(), null)
+//        webViewPlayer.evaluateJavascript(
+//            """
+//            (function() {
+//                var videoElement = document.querySelector('video');
+//                if (videoElement) {
+//                    videoElement.play()
+//                }
+//            })();
+//            """.trimIndent(), null)
         if(AudiusEndpointUtil.getUsedEndpoint() != "null"){
             val api = AudiusEndpointUtil.getApiInstance()
             api.streamTrack(trackId).enqueue(object : Callback<ResponseBody> {
@@ -167,12 +167,13 @@ class PlayAudiusActivity : AppCompatActivity() {
     }
 
     private fun playStream() {
-        if (isPaused) {
+        if (isPaused && mediaPlayer != null) {
             mediaPlayer?.start()
             isPaused = false
             updateSeekBar()
-        } else {
+        } else if(mediaPlayer == null) {
             streamAudiusTrack(trackid)
+            isPaused = false
         }
     }
 

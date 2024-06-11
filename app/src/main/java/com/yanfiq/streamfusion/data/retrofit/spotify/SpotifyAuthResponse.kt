@@ -1,3 +1,3 @@
-package com.yanfiq.youcloudify.data.response.spotify
+package com.yanfiq.streamfusion.data.retrofit.spotify
 
 data class SpotifyAuthResponse(val access_token: String)

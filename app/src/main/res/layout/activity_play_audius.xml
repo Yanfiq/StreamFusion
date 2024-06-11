@@ -19,14 +19,8 @@
     <ImageView
         android:id="@+id/track_artwork"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:scaleType="centerCrop"
+        android:layout_height="wrap_content"
         android:paddingBottom="8dp"/>
-
-    <WebView
-        android:id="@+id/webview_audius_player"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
 
     <SeekBar
         android:id="@+id/seekBar"
@@ -53,4 +47,9 @@
             android:text="Pause"
             android:layout_marginStart="16dp"/>
     </LinearLayout>
+
+    <WebView
+        android:id="@+id/webview_audius_player"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 </LinearLayout>

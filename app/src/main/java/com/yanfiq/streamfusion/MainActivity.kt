@@ -12,6 +12,7 @@ import com.yanfiq.streamfusion.data.retrofit.audius.AudiusEndpointUtil
 import com.yanfiq.streamfusion.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
 import androidx.lifecycle.lifecycleScope
+import com.yanfiq.streamfusion.data.retrofit.spotify.SpotifyApi
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,13 +31,15 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications
+                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_settings
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
         AudiusEndpointUtil.initialize(this)
+
+        SpotifyApi.initialize(this)
 
         lifecycleScope.launch {
             AudiusEndpointUtil.fetchEndpoints(this@MainActivity)
