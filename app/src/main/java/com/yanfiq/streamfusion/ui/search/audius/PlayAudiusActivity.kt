@@ -124,8 +124,8 @@ class PlayAudiusActivity : AppCompatActivity() {
 //                }
 //            })();
 //            """.trimIndent(), null)
-        if(AudiusEndpointUtil.getUsedEndpoint() != "null"){
-            val api = AudiusEndpointUtil.getApiInstance()
+        val api = AudiusEndpointUtil.getApiInstance()
+        if (api != null) {
             api.streamTrack(trackId).enqueue(object : Callback<ResponseBody> {
                 override fun onResponse(
                     call: Call<ResponseBody>,
@@ -142,6 +142,7 @@ class PlayAudiusActivity : AppCompatActivity() {
                         )
                     }
                 }
+
                 override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                     Log.e("StreamActivity", "API call failed: ${t.message}")
                 }
