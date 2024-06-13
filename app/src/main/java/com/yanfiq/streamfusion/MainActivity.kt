@@ -13,6 +13,8 @@ import com.yanfiq.streamfusion.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
 import androidx.lifecycle.lifecycleScope
 import com.yanfiq.streamfusion.data.retrofit.spotify.SpotifyApi
+import com.yanfiq.streamfusion.ui.home.HomeFragment
+import com.yanfiq.streamfusion.ui.settings.ThemeUtils
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,11 +29,9 @@ class MainActivity : AppCompatActivity() {
         val navView: BottomNavigationView = binding.navView
 
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_settings
+                R.id.navigation_home, R.id.navigation_search, R.id.navigation_settings
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -41,9 +41,17 @@ class MainActivity : AppCompatActivity() {
 
         SpotifyApi.initialize(this)
 
+        val themePref = ThemeUtils.getThemePreference(this)
+        ThemeUtils.applyTheme(themePref)
+
         lifecycleScope.launch {
             AudiusEndpointUtil.fetchEndpoints(this@MainActivity)
             AudiusEndpointUtil.setUsedEndpoint(this@MainActivity)
         }
+
+//        lifecycleScope.launch {
+//            AudiusEndpointUtil.fetchEndpoints(this@MainActivity)
+//            AudiusEndpointUtil.setUsedEndpoint(this@MainActivity)
+//        }
     }
 }

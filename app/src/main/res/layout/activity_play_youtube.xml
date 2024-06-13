@@ -38,4 +38,9 @@
             android:layout_marginStart="16dp"/>
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/lyrics"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
 </LinearLayout>

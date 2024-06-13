@@ -1,6 +1,7 @@
 package com.yanfiq.streamfusion.data.retrofit.youtube
 
 import android.content.Context
+import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.yanfiq.streamfusion.BuildConfig
@@ -27,7 +28,10 @@ object YouTubeApi {
 
     private fun getApiKey(context: Context): String? {
         val encryptedSharedPreferences = getEncryptedSharedPreferences(context)
-        return encryptedSharedPreferences.getString("youtube_api_key", BuildConfig.YoutubeApiKey)
+        var api_key = encryptedSharedPreferences.getString("youtube_api_key", BuildConfig.YoutubeApiKey)
+        if (api_key == "") api_key = BuildConfig.YoutubeApiKey
+        Log.d("YoutubeApi", "API key = "+api_key)
+        return api_key
     }
 
     fun getApiInstance(context: Context): YoutubeApiService {

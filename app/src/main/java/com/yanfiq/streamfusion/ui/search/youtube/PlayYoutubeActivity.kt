@@ -1,6 +1,7 @@
 package com.yanfiq.streamfusion.ui.search.youtube
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.SeekBar
@@ -15,15 +16,16 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFram
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.YouTubePlayerTracker
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import com.yanfiq.streamfusion.R
+import retrofit2.Call
+import retrofit2.Response
 import java.util.Timer
 import java.util.TimerTask
 import java.util.regex.Pattern
 
-
 class PlayYoutubeActivity : AppCompatActivity() {
 
     private lateinit var videoId: String
-    private lateinit var trackid: String
+    private lateinit var videoTitle: String
     private lateinit var trackTitle: TextView
     private lateinit var trackArtwork: ImageView
     private lateinit var playButton: Button
@@ -35,17 +37,20 @@ class PlayYoutubeActivity : AppCompatActivity() {
     private lateinit var youTubePlayerView: YouTubePlayerView
     private lateinit var youTubePlayer_reference: YouTubePlayer
     private lateinit var youtubePlayerTracker: YouTubePlayerTracker
+    private lateinit var lyricsTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_play_youtube)
         videoId = intent.getStringExtra("VIDEO_ID") ?: ""
+        videoTitle = intent.getStringExtra("VIDEO_TITLE") ?: ""
 
         playButton = findViewById(R.id.play_button)
         pauseButton = findViewById(R.id.pause_button)
         youTubePlayerView = findViewById(R.id.youtube_player_view)
         lifecycle.addObserver(youTubePlayerView)
         seekBar = findViewById(R.id.seekBar)
+        lyricsTextView = findViewById(R.id.lyrics)
 
         playButton.setOnClickListener { playStream() }
         pauseButton.setOnClickListener { pauseStream() }
@@ -118,7 +123,7 @@ class PlayYoutubeActivity : AppCompatActivity() {
         }, 0, 1000)
     }
 
-    fun parseISODurationToSeconds(duration: String): Int {
+    private fun parseISODurationToSeconds(duration: String): Int {
         val pattern = Pattern.compile("PT(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+)S)?")
         val matcher = pattern.matcher(duration)
 

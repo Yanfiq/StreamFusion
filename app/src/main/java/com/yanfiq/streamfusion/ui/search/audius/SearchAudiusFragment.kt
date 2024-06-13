@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.yanfiq.streamfusion.R
@@ -22,7 +23,7 @@ import retrofit2.Response
 
 private lateinit var recyclerView: RecyclerView
 private lateinit var adapter: TrackAdapter
-private lateinit var viewOfLayout: View
+private lateinit var viewOfLayout: ViewGroup
 
 class SearchAudiusFragment : Fragment() {
     override fun onCreateView(
@@ -31,7 +32,7 @@ class SearchAudiusFragment : Fragment() {
     ): View? {
         super.onCreate(savedInstanceState)
 
-        viewOfLayout = inflater.inflate(R.layout.fragment_search_audius, container, false)
+        viewOfLayout = inflater.inflate(R.layout.fragment_search_audius, container, false) as ViewGroup
         recyclerView = viewOfLayout.findViewById(R.id.recycler_view_audius)
         recyclerView.layoutManager = LinearLayoutManager(context)
         adapter = TrackAdapter(emptyList())
@@ -41,35 +42,32 @@ class SearchAudiusFragment : Fragment() {
     }
 
     fun searchAudius(query: String) {
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
+        val limit = sharedPreferences.getString("result_per_query", "10")!!.toInt()
         if(AudiusEndpointUtil.getUsedEndpoint() != null){
+            Log.d("AudiusSearchFragment", AudiusEndpointUtil.getUsedEndpoint().toString())
             val api = AudiusEndpointUtil.getApiInstance()
-            if (api != null) {
-                api.searchTracks(query).enqueue(object : Callback<AudiusResponse> {
-                    override fun onResponse(call: Call<AudiusResponse>, response: Response<AudiusResponse>) {
-                        if (response.isSuccessful) {
-                            val tracks = response.body()?.data ?: emptyList()
-                            adapter = TrackAdapter(tracks)
-                            recyclerView.adapter = adapter
-                            adapter.setOnItemClickCallback(object : TrackAdapter.OnItemClickCallback {
-                                override fun onItemClicked(data: Track) {
-                                    Toast.makeText(context, data.id, Toast.LENGTH_SHORT).show()
-                                    play(data)
-                                }
-                            })
-                        } else {
-                            Log.d("AudiusSearchFragment", "Response not successful: ${response.errorBody()?.string()}")
-                        }
+            api?.searchTracks(query, limit)?.enqueue(object : Callback<AudiusResponse> {
+                override fun onResponse(call: Call<AudiusResponse>, response: Response<AudiusResponse>) {
+                    if (response.isSuccessful) {
+                        val tracks = response.body()?.data ?: emptyList()
+                        adapter = TrackAdapter(tracks.take(limit))
+                        recyclerView.adapter = adapter
+                        adapter.setOnItemClickCallback(object : TrackAdapter.OnItemClickCallback {
+                            override fun onItemClicked(data: Track) {
+                                play(data)
+                            }
+                        })
+                    } else {
+                        Log.d("AudiusSearchFragment", "Response not successful: ${response.errorBody()?.string()}")
                     }
+                }
 
-                    override fun onFailure(call: Call<AudiusResponse>, t: Throwable) {
-                        Log.d("AudiusSearchFragment", "API call failed: ${t.message}")
-                    }
-                })
-            }
+                override fun onFailure(call: Call<AudiusResponse>, t: Throwable) {
+                    Log.d("AudiusSearchFragment", "API call failed: ${t.message}")
+                }
+            })
         }
-//        lifecycleScope.launch{
-//
-//        }
     }
 
     private fun play(track: Track){

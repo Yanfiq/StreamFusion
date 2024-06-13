@@ -9,6 +9,7 @@ interface SpotifyApiService {
     @GET("v1/search")
     fun searchTracks(
         @Query("q") query: String,
-        @Query("type") type: String
+        @Query("type") type: String,
+        @Query("limit") limit: Int = 10
     ): Call<SpotifySearchResponse>
 }

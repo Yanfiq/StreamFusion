@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.yanfiq.streamfusion.BuildConfig
@@ -45,10 +46,12 @@ class SearchYoutubeFragment : Fragment() {
     }
 
     fun searchYouTube(query: String) {
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
+        val limit = sharedPreferences.getString("result_per_query", "10")!!.toInt()
         lifecycleScope.launch {
             try {
                 val youTubeApiService = YouTubeApi.getApiInstance(requireContext())
-                val searchResponse = youTubeApiService.searchVideos("snippet", query, "video", 20)
+                val searchResponse = youTubeApiService.searchVideos("snippet", query, "video", limit)
                 if (searchResponse.isSuccessful) {
                     val videoItems = searchResponse.body()?.items
                     val videoIds = videoItems?.joinToString(",") { it.id.videoId }
@@ -131,6 +134,7 @@ class SearchYoutubeFragment : Fragment() {
     private fun play(data: Video){
         val explicitIntent = Intent(requireActivity(), PlayYoutubeActivity::class.java)
         explicitIntent.putExtra("VIDEO_ID", data.id)
+        explicitIntent.putExtra("VIDEO_TITLE", data.title)
         explicitIntent.putExtra("VIDEO_DURATION", data.duration)
         startActivity(explicitIntent)
     }

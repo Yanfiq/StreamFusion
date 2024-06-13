@@ -1,19 +1,24 @@
 package com.yanfiq.streamfusion.ui.settings
 
+import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
+import androidx.preference.SwitchPreference
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.yanfiq.streamfusion.R
-import com.yanfiq.streamfusion.data.retrofit.spotify.SpotifyApi
+import com.yanfiq.streamfusion.ui.settings.about.AboutActivity
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey)
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
 
         val masterKey = MasterKey.Builder(requireContext())
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -36,7 +41,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     "No API key set"
                 }
             }
-
+            setOnBindEditTextListener {
+                it.setText("") // Clear the EditText field when the dialog is shown
+            }
             setOnPreferenceChangeListener { _, newValue ->
                 encryptedSharedPreferences.edit().putString(key, newValue as String).apply()
                 true
@@ -52,7 +59,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     "No client id set"
                 }
             }
-
+            setOnBindEditTextListener {
+                it.setText("") // Clear the EditText field when the dialog is shown
+            }
             setOnPreferenceChangeListener { _, newValue ->
                 encryptedSharedPreferences.edit().putString(key, newValue as String).apply()
                 true
@@ -68,9 +77,52 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     "No client secret set"
                 }
             }
-
+            setOnBindEditTextListener {
+                it.setText("") // Clear the EditText field when the dialog is shown
+            }
             setOnPreferenceChangeListener { _, newValue ->
                 encryptedSharedPreferences.edit().putString(key, newValue as String).apply()
+                true
+            }
+        }
+
+        findPreference<Preference>("about")?.setOnPreferenceClickListener {
+            startActivity(Intent(requireContext(), AboutActivity::class.java))
+            true
+        }
+
+        findPreference<SwitchPreference>("switch_dark_mode")?.apply {
+            setOnPreferenceChangeListener { preference, newValue ->
+                if (preference is SwitchPreference) {
+                    val isEnabled = newValue as Boolean
+
+                    if (isEnabled) {
+                        ThemeUtils.saveThemePreference(requireContext(), "dark")
+                    } else {
+                        ThemeUtils.saveThemePreference(requireContext(), "light")
+                    }
+                    ThemeUtils.applyTheme(if (isChecked) "dark" else "light")
+                    requireActivity().recreate()
+                }
+                true
+            }
+            isChecked = if (ThemeUtils.getThemePreference(requireContext()) == "dark") true else false
+        }
+
+        findPreference<EditTextPreference>("result_per_query")?.apply {
+            summaryProvider = Preference.SummaryProvider<EditTextPreference> { preference ->
+                val storedValue = preference.text
+                if (!storedValue.isNullOrEmpty()) {
+                    storedValue.mask()
+                } else {
+                    "Not set"
+                }
+            }
+            setOnBindEditTextListener {editText ->
+                editText.inputType = InputType.TYPE_CLASS_NUMBER
+            }
+            setOnPreferenceChangeListener { _, newValue ->
+                sharedPreferences.edit().putString(key, newValue as String).apply()
                 true
             }
         }

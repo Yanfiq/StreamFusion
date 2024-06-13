@@ -60,8 +60,10 @@ object SpotifyApi {
     }
 
     private fun getClientCredentials(): Pair<String?, String?> {
-        val clientId = sharedPreferences.getString("spotify_client_id", BuildConfig.SpotifyClientId)
-        val clientSecret = sharedPreferences.getString("spotify_client_secret", BuildConfig.SpotifyClientSecret)
+        var clientId = sharedPreferences.getString("spotify_client_id", BuildConfig.SpotifyClientId)
+        var clientSecret = sharedPreferences.getString("spotify_client_secret", BuildConfig.SpotifyClientSecret)
+        if (clientId == "") clientId = BuildConfig.SpotifyClientId
+        if (clientSecret == "") clientSecret = BuildConfig.SpotifyClientSecret
         Log.d(TAG, "Client ID: $clientId, Client Secret: $clientSecret")
         return Pair(clientId, clientSecret)
     }

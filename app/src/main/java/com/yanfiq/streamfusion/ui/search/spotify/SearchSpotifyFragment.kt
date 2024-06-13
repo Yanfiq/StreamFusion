@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.yanfiq.streamfusion.R
@@ -45,10 +46,12 @@ class SearchSpotifyFragment : Fragment() {
     }
 
     fun searchSpotify(query: String) {
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
+        val limit = sharedPreferences.getString("result_per_query", "10")!!.toInt()
         SpotifyApi.fetchAccessToken(requireContext()) { success ->
             activity?.runOnUiThread {
                 if (success) {
-                    SpotifyApi.service.searchTracks(query, "track").enqueue(object : Callback<SpotifySearchResponse> {
+                    SpotifyApi.service.searchTracks(query, "track", limit).enqueue(object : Callback<SpotifySearchResponse> {
                         override fun onResponse(call: Call<SpotifySearchResponse>, response: Response<SpotifySearchResponse>) {
                             activity?.runOnUiThread {
                                 if (response.isSuccessful) {
