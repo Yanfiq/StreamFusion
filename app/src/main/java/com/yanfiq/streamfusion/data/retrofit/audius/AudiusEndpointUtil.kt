@@ -6,6 +6,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
 import com.yanfiq.streamfusion.data.response.audius.AudiusResponse
+import com.yanfiq.streamfusion.data.response.audius.Track
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -17,77 +18,82 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.io.IOException
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 object AudiusEndpointUtil {
     private const val ENDPOINTS_FILE_NAME = "endpoints.json"
     private var endpointUsed: String? = null
     private lateinit var endpointsFile: File
     private val gson = Gson()
+    private lateinit var trends: List<Track>;
 
-    fun initialize(context: Context){
+    suspend fun initialize(context: Context){
         endpointsFile = File(context.filesDir, ENDPOINTS_FILE_NAME)
         if (!endpointsFile.exists()) {
-            val defaultEndpoints = listOf(        "https://audius-discovery-13.cultur3stake.com",
-                "https://audius-discovery-9.cultur3stake.com",
-                "https://discoveryprovider.audius.co",
-                "https://audius-discovery-2.cultur3stake.com",
-                "https://dn-jpn.audius.metadata.fyi",
-                "https://audius-discovery-3.altego.net",
-                "https://dn1.monophonic.digital",
-                "https://audius-discovery-14.cultur3stake.com",
-                "https://blockdaemon-audius-discovery-08.bdnodes.net",
-                "https://discovery-au-02.audius.openplayer.org",
-                "https://audius-metadata-2.figment.io",
-                "https://dn2.monophonic.digital",
-                "https://audius-metadata-5.figment.io",
+            val defaultEndpoints = listOf(
                 "https://audius-discovery-4.theblueprint.xyz",
-                "https://blockdaemon-audius-discovery-06.bdnodes.net",
-                "https://blockdaemon-audius-discovery-02.bdnodes.net",
-                "https://blockdaemon-audius-discovery-01.bdnodes.net",
-                "https://blockchange-audius-discovery-04.bdnodes.net",
-                "https://audius-discovery-17.cultur3stake.com",
-                "https://audius-metadata-1.figment.io",
-                "https://audius-dp.singapore.creatorseed.com",
-                "https://audius-discovery-3.theblueprint.xyz",
+                "https://audius-discovery-9.cultur3stake.com",
+                "https://blockdaemon-audius-discovery-05.bdnodes.net",
                 "https://audius-discovery-12.cultur3stake.com",
-                "https://audius-discovery-5.cultur3stake.com",
-                "https://discoveryprovider3.audius.co",
-                "https://audius-nodes.com",
-                "https://audius-discovery-1.theblueprint.xyz",
-                "https://audius-metadata-4.figment.io",
-                "https://audius-discovery-2.altego.net",
-                "https://audius.w3coins.io",
-                "https://dn1.matterlightblooming.xyz",
-                "https://dn1.nodeoperator.io",
-                "https://audius-discovery-2.theblueprint.xyz",
-                "https://audius-discovery-18.cultur3stake.com",
+                "https://audius-discovery-11.cultur3stake.com",
+                "https://audius-metadata-3.figment.io",
                 "https://blockchange-audius-discovery-02.bdnodes.net",
                 "https://audius-discovery-4.cultur3stake.com",
-                "https://audius-discovery-15.cultur3stake.com",
-                "https://audius-discovery-6.cultur3stake.com",
-                "https://blockdaemon-audius-discovery-05.bdnodes.net",
-                "https://audius-dp.amsterdam.creatorseed.com",
-                "https://disc-lon01.audius.hashbeam.com",
-                "https://blockchange-audius-discovery-01.bdnodes.net",
-                "https://dn-usa.audius.metadata.fyi",
-                "https://discovery-us-01.audius.openplayer.org",
-                "https://dn1.stuffisup.com",
-                "https://audius-metadata-3.figment.io",
-                "https://audius-discovery-8.cultur3stake.com",
+                "https://audius-discovery-18.cultur3stake.com",
+                "https://audius-discovery-14.cultur3stake.com",
+                "https://blockdaemon-audius-discovery-02.bdnodes.net",
+                "https://blockdaemon-audius-discovery-06.bdnodes.net",
+                "https://audius-discovery-1.theblueprint.xyz",
+                "https://audius-discovery-13.cultur3stake.com",
                 "https://audius-discovery-1.altego.net",
-                "https://blockdaemon-audius-discovery-03.bdnodes.net",
+                "https://discovery-au-02.audius.openplayer.org",
+                "https://audius-nodes.com",
                 "https://audius-discovery-16.cultur3stake.com",
-                "https://audius-discovery-1.cultur3stake.com",
-                "https://blockdaemon-audius-discovery-04.bdnodes.net",
-                "https://blockchange-audius-discovery-03.bdnodes.net",
-                "https://audius-discovery-10.cultur3stake.com",
-                "https://audius-discovery-11.cultur3stake.com",
+                "https://dn1.matterlightblooming.xyz",
+                "https://audius-discovery-3.altego.net",
                 "https://audius-discovery-7.cultur3stake.com",
                 "https://discoveryprovider2.audius.co",
-                "https://audius-discovery-3.cultur3stake.com")
+                "https://audius-discovery-10.cultur3stake.com",
+                "https://blockchange-audius-discovery-01.bdnodes.net",
+                "https://audius-discovery-3.theblueprint.xyz",
+                "https://blockdaemon-audius-discovery-04.bdnodes.net",
+                "https://blockchange-audius-discovery-05.bdnodes.net",
+                "https://audius-discovery-5.cultur3stake.com",
+                "https://dn2.monophonic.digital",
+                "https://audius-dp.singapore.creatorseed.com",
+                "https://audius-discovery-1.cultur3stake.com",
+                "https://audius-discovery-15.cultur3stake.com",
+                "https://discovery-us-01.audius.openplayer.org",
+                "https://discoveryprovider.audius.co",
+                "https://blockchange-audius-discovery-04.bdnodes.net",
+                "https://blockdaemon-audius-discovery-01.bdnodes.net",
+                "https://audius-discovery-3.cultur3stake.com",
+                "https://audius-metadata-5.figment.io",
+                "https://audius-discovery-6.cultur3stake.com",
+                "https://audius-metadata-4.figment.io",
+                "https://dn1.nodeoperator.io",
+                "https://dn-usa.audius.metadata.fyi",
+                "https://dn1.monophonic.digital",
+                "https://audius-discovery-17.cultur3stake.com",
+                "https://blockdaemon-audius-discovery-03.bdnodes.net",
+                "https://audius.w3coins.io",
+                "https://audius-dp.amsterdam.creatorseed.com",
+                "https://dn-jpn.audius.metadata.fyi",
+                "https://blockchange-audius-discovery-03.bdnodes.net",
+                "https://audius-metadata-1.figment.io",
+                "https://disc-lon01.audius.hashbeam.com",
+                "https://discoveryprovider3.audius.co",
+                "https://audius-discovery-2.cultur3stake.com",
+                "https://blockdaemon-audius-discovery-08.bdnodes.net",
+                "https://audius-discovery-2.theblueprint.xyz",
+                "https://audius-discovery-8.cultur3stake.com",
+                "https://audius-discovery-2.altego.net",
+                "https://audius-metadata-2.figment.io",
+                "https://dn1.stuffisup.com")
             updateEndpoints(context, defaultEndpoints)
         }
-        endpointUsed = "null"
+        fetchEndpoints(context)
+        setUsedEndpoint(context)
     }
 
     fun getEndpoints(context: Context): List<String> {
@@ -141,31 +147,28 @@ object AudiusEndpointUtil {
             }
         }
 
-        Log.d("AudiusEndpointUtil", "Fastest endpoint: "+fastestEndpoint.toString())
+        Log.d("AudiusEndpointUtil", "Fastest endpoint: $fastestEndpoint")
         fastestEndpoint
     }
 
-//    private suspend fun isEndpointValid(endpoint: String): Boolean = withContext(Dispatchers.IO) {
-//        try {
-//            // Create a request to ping the endpoint
-//            val client = OkHttpClient()
-//            val request = Request.Builder()
-//                .url(endpoint) // You can use a specific health check URL if available
-//                .build()
-//
-//            val response = client.newCall(request).execute()
-//            response.isSuccessful
-//        } catch (e: Exception) {
-//            false
-//        }
-//    }
     private suspend fun isEndpointValid(endpoint: String): Boolean = withContext(Dispatchers.IO) {
         try {
-            val api = AudiusApi.retrofitService(endpoint)
-            val response: Response<*> = api.searchTracks("Xenogenesis").execute()
-            response.isSuccessful
+            // Use OkHttpClient to send a lightweight GET request to the endpoint
+            val client = OkHttpClient.Builder()
+                .connectTimeout(5, TimeUnit.SECONDS)  // Set a timeout for the connection
+                .readTimeout(5, TimeUnit.SECONDS)  // Set a timeout for reading the response
+                .build()
+
+            // Construct the request to a lightweight endpoint (e.g., health check)
+            val request = Request.Builder()
+                .url("$endpoint/health_check")  // Assuming there's a health check endpoint
+                .build()
+
+            // Execute the request and check if the response is successful
+            val response = client.newCall(request).execute()
+            response.isSuccessful  // Return true if the response status is 2xx
         } catch (e: Exception) {
-            false
+            false  // Return false if any exception occurs
         }
     }
 
@@ -195,9 +198,6 @@ object AudiusEndpointUtil {
 
     fun getApiInstance(): AudiusApiService? {
         Log.d("AudiusEndpointUtil", "Used endpoints: ${getUsedEndpoint().toString()}")
-        if(getUsedEndpoint() != null){
-            return getUsedEndpoint()?.let { AudiusApi.retrofitService(it) }
-        }
-        return null
+        return getUsedEndpoint()?.let { AudiusApi.retrofitService(it) }
     }
 }

@@ -31,8 +31,8 @@ class AboutActivity : AppCompatActivity() {
             intent.putExtra("DATA_NAME", "Muhammad Saifuddin Eka Nugraha")
             intent.putExtra("DATA_NIM", "L0122115")
             intent.putExtra("DATA_MOTTO", "Gitar dipetik bass ku betot, hai nona cantik bass ku betot")
-            intent.putExtra("DATA_INSTAGRAM_USERNAME", "")
-            intent.putExtra("DATA_WHATSAPP_NUM", "")
+            intent.putExtra("DATA_INSTAGRAM_USERNAME", "m_saifuddin711")
+            intent.putExtra("DATA_WHATSAPP_NUM", "6281909561200")
             intent.putExtra("DATA_IMG", R.drawable.udin)
             startActivity(intent)
         }
@@ -42,8 +42,8 @@ class AboutActivity : AppCompatActivity() {
             intent.putExtra("DATA_NAME", "Muhammad Danish Dhiyaulhaq")
             intent.putExtra("DATA_NIM", "L0122107")
             intent.putExtra("DATA_MOTTO", "Meskipun mukaku kayak titid, tapi cintaku padamu unlimited")
-            intent.putExtra("DATA_INSTAGRAM_USERNAME", "")
-            intent.putExtra("DATA_WHATSAPP_NUM", "")
+            intent.putExtra("DATA_INSTAGRAM_USERNAME", "danshd5")
+            intent.putExtra("DATA_WHATSAPP_NUM", "6281358328255")
             intent.putExtra("DATA_IMG", R.drawable.danis)
             startActivity(intent)
         }
