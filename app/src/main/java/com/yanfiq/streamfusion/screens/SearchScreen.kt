@@ -52,10 +52,10 @@ import com.fleeksoft.ksoup.nodes.Document
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.select.Elements
 import com.yanfiq.streamfusion.data.response.audius.AudiusResponse
-import com.yanfiq.streamfusion.ui.theme.NavigationBarMediumTheme
 import com.yanfiq.streamfusion.data.retrofit.audius.AudiusEndpointUtil
 import com.yanfiq.streamfusion.screens.PlayAudiusActivity
 import com.yanfiq.streamfusion.ui.search.soundcloud.PlaySoundcloudActivity
+import com.yanfiq.streamfusion.ui.theme.AppTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -71,7 +71,7 @@ fun SearchScreen(navController: NavController) {
     var searchResults_soundcloud by remember { mutableStateOf(emptyList<com.yanfiq.streamfusion.data.response.soundcloud.Track>()) }
     var searchResults_youtube by remember { mutableStateOf(emptyList<com.yanfiq.streamfusion.data.response.youtube.Video>()) }
 
-    NavigationBarMediumTheme {
+    AppTheme {
         Surface(
             modifier = Modifier
                 .fillMaxSize()
@@ -92,9 +92,9 @@ fun SearchScreen(navController: NavController) {
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
-//                        search_audius(searchQuery, context) { results ->
-//                            searchResults_audius = results
-//                        }
+                        search_audius(searchQuery, context) { results ->
+                            searchResults_audius = results
+                        }
                         CoroutineScope(Dispatchers.IO).launch {
                             search_soundcloud(searchQuery, context){ results ->
                                 searchResults_soundcloud = results
@@ -192,13 +192,13 @@ suspend fun search_soundcloud(query: String, context: Context, onResults: (List<
     val songs_wrapper: Element? = doc.select(".List_VerticalList__2uQYU").first()
     if(songs_wrapper != null){
         val songs: Elements = songs_wrapper.select("li")
-        var tracks: MutableList<com.yanfiq.streamfusion.data.response.soundcloud.Track> = mutableListOf()
+        val tracks: MutableList<com.yanfiq.streamfusion.data.response.soundcloud.Track> = mutableListOf()
         songs.forEach{song: Element ->
-            var title: String = song.select(".Information_CellTitle__2KitR").html()
-            var artist: String = song.select(".Information_CellSubtitle__1mXGx").html()
-            var image: String = song.select("img").attr("src")
-            var stream_url: String = song.select("a").attr("href");
-            var track = com.yanfiq.streamfusion.data.response.soundcloud.Track(title, artist, image, "soundcloud.com"+stream_url)
+            val title: String = song.select(".Information_CellTitle__2KitR").html()
+            val artist: String = song.select(".Information_CellSubtitle__1mXGx").html()
+            val image: String = song.select("img").attr("src")
+            val stream_url: String = song.select("a").attr("href");
+            val track = com.yanfiq.streamfusion.data.response.soundcloud.Track(title, artist, image, "soundcloud.com"+stream_url)
             tracks.add(track)
         }
         onResults(tracks)
@@ -216,8 +216,9 @@ fun ListItem(title: String, artist: String, thumbnail_url: String, onCLick: () -
     ) {
         AsyncImage(model = thumbnail_url,
             contentDescription = title,
-            modifier = Modifier.width(100.dp)
-                .aspectRatio(1f/1f))
+            modifier = Modifier
+                .width(100.dp)
+                .aspectRatio(1f / 1f))
         Spacer(modifier = Modifier.width(10.dp))
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(text = title, style = MaterialTheme.typography.titleMedium)

@@ -17,8 +17,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
@@ -30,6 +34,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -50,6 +55,7 @@ import androidx.core.view.WindowInsetsCompat
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import com.yanfiq.streamfusion.R
+import com.yanfiq.streamfusion.ui.theme.AppTheme
 import com.yanfiq.streamfusion.ui.youtube.VideoAdapter
 import kotlinx.coroutines.delay
 
@@ -128,47 +134,67 @@ fun SoundcloudPlayScreen(
     </html>
     """.trimIndent()
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        WebViewScreen(htmlData = htmlData, returnWebView = { webView_returned ->
-            webView = webView_returned
-        }, returnDuration = { returnDuration ->
-            maxDuration = returnDuration
-            isPlayerReady = true
-        }, returnElapsedTime = { elapsedTime ->
-            sliderPosition = elapsedTime
-        })
+    DisposableEffect(Unit) {
+        onDispose {
+            webView?.destroy()
+        }
+    }
 
-        Text(
-            text = trackTitle,
-            style = MaterialTheme.typography.titleLarge)
-        Text(
-            text = trackArtist,
-            style = MaterialTheme.typography.titleSmall)
-        AsyncImage(
-            model = trackArtwork,
-            contentDescription = trackTitle,
-            imageLoader = ImageLoader(context),
-            modifier = Modifier.width(600.dp)
-                .height(600.dp))
-        Slider(
-            value = sliderPosition,
-            onValueChange = { newValue ->
-                sliderPosition = newValue
-                webView?.evaluateJavascript("SC.Widget(document.getElementById('soundcloud_widget')).seekTo(${sliderPosition * 1000f})", null)
-            },
-            valueRange = 0f..maxDuration,
-            enabled = isPlayerReady,
-            modifier = Modifier.fillMaxWidth()) // Slider functionality
-        Button(
-            onClick = {
-                webView?.evaluateJavascript("SC.Widget(document.getElementById('soundcloud_widget')).toggle()", null)
-                isPaused = !isPaused
-                      },
-            enabled = isPlayerReady) {
-            Icon(
-                imageVector = if (isPaused) Icons.Filled.PlayArrow else Icons.Filled.Pause,
-                contentDescription = "Play/Pause button",
-            )
+    AppTheme {
+        Surface (
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ){
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                WebViewScreen(htmlData = htmlData, returnWebView = { webView_returned ->
+                    webView = webView_returned
+                }, returnDuration = { returnDuration ->
+                    maxDuration = returnDuration
+                    isPlayerReady = true
+                }, returnElapsedTime = { elapsedTime ->
+                    sliderPosition = elapsedTime
+                })
+
+                Text(
+                    text = trackTitle,
+                    style = MaterialTheme.typography.titleLarge)
+                Text(
+                    text = trackArtist,
+                    style = MaterialTheme.typography.titleMedium)
+                AsyncImage(
+                    model = trackArtwork,
+                    contentDescription = trackTitle,
+                    imageLoader = ImageLoader(context),
+                    modifier = Modifier
+                        .width(400.dp)
+                        .height(400.dp))
+                Slider(
+                    value = sliderPosition,
+                    onValueChange = { newValue ->
+                        sliderPosition = newValue
+                        webView?.evaluateJavascript("SC.Widget(document.getElementById('soundcloud_widget')).seekTo(${sliderPosition * 1000f})", null)
+                    },
+                    valueRange = 0f..maxDuration,
+                    enabled = isPlayerReady,
+                    modifier = Modifier.fillMaxWidth()) // Slider functionality
+                Button(
+                    onClick = {
+                        webView?.evaluateJavascript("SC.Widget(document.getElementById('soundcloud_widget')).toggle()", null)
+                        isPaused = !isPaused
+                    },
+                    enabled = isPlayerReady,
+                    modifier = Modifier
+                        .width(75.dp)
+                        .height(75.dp),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isPaused) Icons.Filled.PlayArrow else Icons.Filled.Pause,
+                        contentDescription = "Play/Pause button",
+                        modifier = Modifier.fillMaxSize(0.60f)
+                    )
+                }
+            }
         }
     }
 }
@@ -214,8 +240,15 @@ fun WebViewScreen(
     })
 }
 
-//@Preview
-//@Composable
-//fun preview_soundcloud_play(){
-//    WebViewScreen()
-//}
+@Preview
+@Composable
+fun preview_soundcloud_play(){
+    val context = LocalContext.current
+    SoundcloudPlayScreen(
+        trackUrl = "Acumalaka",
+        trackTitle = "Dear You - DJ Genericname",
+        trackArtist = "DJ Genericname",
+        trackArtwork = "https://i1.sndcdn.com/artworks-000057356357-9tmqex-t500x500.jpg",
+        context = context
+    )
+}

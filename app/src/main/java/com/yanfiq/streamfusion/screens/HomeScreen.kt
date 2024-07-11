@@ -19,18 +19,21 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.yanfiq.streamfusion.ui.theme.NavigationBarMediumTheme
+//import com.yanfiq.streamfusion.ui.theme.NavigationBarMediumTheme
 import com.yanfiq.streamfusion.R
+import com.yanfiq.streamfusion.ui.theme.AppTheme
 
 @Composable
 fun HomeScreen(navController: NavController) {
-    NavigationBarMediumTheme {
+    AppTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
             Column(
-                modifier = Modifier.fillMaxSize().padding(15.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(15.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {

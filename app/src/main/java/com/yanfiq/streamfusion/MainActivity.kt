@@ -49,6 +49,7 @@ import com.yanfiq.streamfusion.ui.home.HomeFragment
 import com.yanfiq.streamfusion.ui.search.SearchFragment
 import com.yanfiq.streamfusion.ui.settings.SettingsFragment
 import com.yanfiq.streamfusion.ui.settings.ThemeUtils
+import com.yanfiq.streamfusion.ui.theme.AppTheme
 
 class MainActivity : AppCompatActivity() {
 
@@ -65,15 +66,17 @@ class MainActivity : AppCompatActivity() {
 //        ThemeUtils.applyTheme(themePref)
 
         lifecycleScope.launch {
-//            AudiusEndpointUtil.initialize(this@MainActivity)
+            AudiusEndpointUtil.initialize(this@MainActivity)
         }
     }
 
     @Preview
     @Composable
     fun MainScreen() {
-        Column {
-            BottomNavigationBar()
+        AppTheme {
+            Column {
+                BottomNavigationBar()
+            }
         }
     }
 }

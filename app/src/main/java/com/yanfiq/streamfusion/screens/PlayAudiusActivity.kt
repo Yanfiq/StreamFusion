@@ -8,7 +8,9 @@ import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -21,6 +23,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -37,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import com.yanfiq.streamfusion.data.retrofit.audius.AudiusEndpointUtil
+import com.yanfiq.streamfusion.ui.theme.AppTheme
 import kotlinx.coroutines.delay
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -96,36 +100,46 @@ fun AudiusPlayScreen(
         }
     }
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = trackTitle, style = MaterialTheme.typography.titleLarge)
-        Text(text = trackArtist, style = MaterialTheme.typography.titleSmall)
-        AsyncImage(
-            model = trackArtwork,
-            contentDescription = trackTitle,
-            imageLoader = ImageLoader(context),
-            modifier = Modifier.width(600.dp)
-                .height(600.dp)
-        )
-        Slider(value = sliderPosition,
-            onValueChange = { newValue ->
-                sliderPosition = newValue
-                mediaPlayer.seekTo((newValue * 1000).toInt())
-            },
-            valueRange = 0f..maxDuration,
-            enabled = isPlayerReady,
-            modifier = Modifier.fillMaxWidth()) // Slider functionality
-        Button(
-            onClick = {
-                isPaused = !isPaused
-                if (isPaused) mediaPlayer.pause() else mediaPlayer.start()
-            },
-            enabled = isPlayerReady,
-            modifier = Modifier.width(75.dp).height(75.dp)
+    AppTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
         ) {
-            Icon(
-                imageVector = if (isPaused) Icons.Filled.PlayArrow else Icons.Filled.Pause,
-                contentDescription = "Play/Pause button",
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = trackTitle, style = MaterialTheme.typography.titleLarge)
+                Text(text = trackArtist, style = MaterialTheme.typography.titleMedium)
+                AsyncImage(
+                    model = trackArtwork,
+                    contentDescription = trackTitle,
+                    imageLoader = ImageLoader(context),
+                    modifier = Modifier.width(400.dp)
+                        .height(400.dp)
+                )
+                Slider(value = sliderPosition,
+                    onValueChange = { newValue ->
+                        sliderPosition = newValue
+                        mediaPlayer.seekTo((newValue * 1000).toInt())
+                    },
+                    valueRange = 0f..maxDuration,
+                    enabled = isPlayerReady,
+                    modifier = Modifier.fillMaxWidth()) // Slider functionality
+                Button(
+                    onClick = {
+                        isPaused = !isPaused
+                        if (isPaused) mediaPlayer.pause() else mediaPlayer.start()
+                    },
+                    enabled = isPlayerReady,
+                    modifier = Modifier.width(75.dp)
+                        .height(75.dp),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isPaused) Icons.Filled.PlayArrow else Icons.Filled.Pause,
+                        contentDescription = "Play/Pause button",
+                        modifier = Modifier.fillMaxSize(0.60f)
+                    )
+                }
+            }
         }
     }
 }
