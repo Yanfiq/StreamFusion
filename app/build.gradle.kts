@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -37,9 +38,13 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.2"
+    }
     buildFeatures {
         buildConfig = true
         viewBinding = true
+        compose = true
     }
     packaging {
         resources.excludes.add("META-INF/DEPENDENCIES")
@@ -55,6 +60,32 @@ android {
 }
 
 dependencies {
+    //compose
+    val composeBom = platform("androidx.compose:compose-bom:2024.06.00")
+    implementation(composeBom)
+    androidTestImplementation(composeBom)
+    // Material Design 3
+    implementation("androidx.compose.material3:material3")
+    // Android Studio Preview support
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    // UI Tests
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    // Optional - Add full set of material icons
+    implementation("androidx.compose.material:material-icons-extended")
+    // Optional - Add window size utils
+    implementation("androidx.compose.material3:material3-window-size-class")
+    // Optional - Integration with activities
+    implementation("androidx.activity:activity-compose:1.9.0")
+    // Optional - Integration with ViewModels
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
+    // Optional - Integration with LiveData
+    implementation("androidx.compose.runtime:runtime-livedata")
+    // navigation
+    implementation("androidx.navigation:navigation-compose:2.7.0-rc01")
+    //coil
+    implementation("io.coil-kt:coil-compose:2.6.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -79,8 +110,14 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("com.pierfrancescosoffritti.androidyoutubeplayer:custom-ui:12.1.0")
     implementation("androidx.security:security-crypto:1.1.0-alpha03")
+
+    // https://mvnrepository.com/artifact/com.fleeksoft.ksoup/ksoup
+    implementation("com.fleeksoft.ksoup:ksoup:0.1.2")
+    implementation("com.fleeksoft.ksoup:ksoup-network:0.1.2")
+
     implementation(libs.androidx.activity)
     implementation(libs.androidx.preference)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

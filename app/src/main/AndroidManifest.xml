@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
     <application
         android:allowBackup="true"
@@ -26,7 +28,10 @@
             android:name=".ui.search.soundcloud.PlaySoundcloudActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.search.audius.PlayAudiusActivity"
+            android:name=".screens.PlayAudiusActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.PlaySoundcloudActivity"
             android:exported="false" />
         <activity
             android:name=".ui.search.youtube.PlayYoutubeActivity"

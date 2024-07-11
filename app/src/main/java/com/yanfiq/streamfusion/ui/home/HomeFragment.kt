@@ -8,6 +8,9 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Text
+import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -37,27 +40,34 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
-
-        audius_btn = binding.audiusTrendsBtn
-        audius_trends = binding.audiusTrends
-        audius_trends.layoutManager = LinearLayoutManager(context)
-        adapter = TrackAdapter(emptyList())
-        audius_trends.adapter = adapter
-        audius_trends.visibility = View.GONE
-
-        audius_btn.setOnClickListener {
-            if (audius_trends.visibility == View.VISIBLE) {
-                audius_trends.visibility = View.GONE
-            } else {
-                audius_trends.visibility = View.VISIBLE
-                if (AudiusEndpointUtil.getUsedEndpoint() != null) {
-                    fetchTrendingTracks()
+        return ComposeView(requireContext()).apply {
+            setContent {
+                Column {
+                    Text("Home Fragment")
                 }
             }
         }
-
-        return binding.root
+//        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+//
+//        audius_btn = binding.audiusTrendsBtn
+//        audius_trends = binding.audiusTrends
+//        audius_trends.layoutManager = LinearLayoutManager(context)
+//        adapter = TrackAdapter(emptyList())
+//        audius_trends.adapter = adapter
+//        audius_trends.visibility = View.GONE
+//
+//        audius_btn.setOnClickListener {
+//            if (audius_trends.visibility == View.VISIBLE) {
+//                audius_trends.visibility = View.GONE
+//            } else {
+//                audius_trends.visibility = View.VISIBLE
+//                if (AudiusEndpointUtil.getUsedEndpoint() != null) {
+//                    fetchTrendingTracks()
+//                }
+//            }
+//        }
+//
+//        return binding.root
     }
 
     fun fetchTrendingTracks() {

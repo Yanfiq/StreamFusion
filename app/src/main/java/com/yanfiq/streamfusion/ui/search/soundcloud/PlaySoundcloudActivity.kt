@@ -48,18 +48,8 @@ class PlaySoundcloudActivity : AppCompatActivity() {
                 super.onPageFinished(view, url)
                 injectJavaScript()
             }
-//            override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
-//                if (url != null) {
-//                    if(url_played?.let { url.contains(it) } == false) {
-//                        webView.loadUrl(url_played!!)
-//                        Log.d("webviewproblem", url+" canceled")
-//                    } else{
-//                        super.doUpdateVisitedHistory(view, url, isReload)
-//                    }
-//                }
-//            }
         }
-//        webView.webChromeClient = WebChromeClient()
+        webView.webChromeClient = WebChromeClient()
         setDesktopMode(webView, true)
     }
 

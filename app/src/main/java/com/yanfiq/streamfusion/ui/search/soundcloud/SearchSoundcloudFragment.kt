@@ -20,7 +20,6 @@ import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.select.Elements
 import com.yanfiq.streamfusion.R
 import com.yanfiq.streamfusion.data.response.soundcloud.Track
-import com.yanfiq.streamfusion.ui.search.audius.PlayAudiusActivity
 import com.yanfiq.streamfusion.ui.search.soundcloud.TrackAdapter
 
 class SearchSoundcloudFragment : Fragment() {

@@ -71,10 +71,10 @@ class SearchAudiusFragment : Fragment() {
     }
 
     private fun play(track: Track){
-        val explicitIntent = Intent(requireActivity(), PlayAudiusActivity::class.java)
-        explicitIntent.putExtra("TRACK_ID", track.id)
-        explicitIntent.putExtra("TRACK_TITLE", track.title)
-        explicitIntent.putExtra("TRACK_ARTWORK", track.artwork.medium)
-        startActivity(explicitIntent)
+//        val explicitIntent = Intent(requireActivity(), PlayAudiusActivity::class.java)
+//        explicitIntent.putExtra("TRACK_ID", track.id)
+//        explicitIntent.putExtra("TRACK_TITLE", track.title)
+//        explicitIntent.putExtra("TRACK_ARTWORK", track.artwork.medium)
+//        startActivity(explicitIntent)
     }
 }

@@ -165,10 +165,11 @@ object AudiusEndpointUtil {
                 .build()
 
             // Execute the request and check if the response is successful
-            val response = client.newCall(request).execute()
-            response.isSuccessful  // Return true if the response status is 2xx
+            client.newCall(request).execute().use { response ->
+                return@withContext response.isSuccessful
+            }  // Return true if the response status is 2xx
         } catch (e: Exception) {
-            false  // Return false if any exception occurs
+            return@withContext false// Return false if any exception occurs
         }
     }
 
@@ -185,8 +186,8 @@ object AudiusEndpointUtil {
 
             override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
                 if (response.isSuccessful) {
-                    response.body?.string()?.let { responseBody ->
-                        val newEndpoints = parseEndpoints(responseBody)
+                    response.body?.use { responseBody ->
+                        val newEndpoints = parseEndpoints(responseBody.string())
                         updateEndpoints(context, newEndpoints)
                     }
                 } else {
