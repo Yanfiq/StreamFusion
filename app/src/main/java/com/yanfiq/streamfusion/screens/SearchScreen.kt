@@ -41,6 +41,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.preference.PreferenceManager
@@ -53,6 +55,8 @@ import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.select.Elements
 import com.yanfiq.streamfusion.data.response.audius.AudiusResponse
 import com.yanfiq.streamfusion.data.retrofit.audius.AudiusEndpointUtil
+import com.yanfiq.streamfusion.data.viewmodel.SearchResult
+import com.yanfiq.streamfusion.data.viewmodel.SearchStatus
 import com.yanfiq.streamfusion.ui.theme.AppTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -66,12 +70,10 @@ import kotlin.coroutines.resume
 
 
 @Composable
-fun SearchScreen(navController: NavController) {
+fun SearchScreen(searchResult: SearchResult = viewModel(), searchStatus: SearchStatus = viewModel(), navController: NavController) {
     var searchQuery by remember { mutableStateOf("") }
     var searchInput by remember { mutableStateOf("") }
     val context = LocalContext.current
-    var searchResults_audius by remember { mutableStateOf(emptyList<com.yanfiq.streamfusion.data.response.audius.Track>()) }
-    var searchResults_youtube by remember { mutableStateOf(emptyList<com.yanfiq.streamfusion.data.response.youtube.Video>()) }
 
     AppTheme {
         Surface(
@@ -94,19 +96,15 @@ fun SearchScreen(navController: NavController) {
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
-//                        search_audius(searchQuery, context) { results ->
-//                            searchResults_audius = results
-//                        }
+                        searchStatus.updateSoundcloudSearchStatus(true)
+                        searchStatus.updateAudiusSearchStatus(true)
                         searchQuery = searchInput
-                        CoroutineScope(Dispatchers.IO).launch {
-
-                        }
                     }
                 ) {
                     Text(text = "Search")
                 }
 
-                SearchTabLayout(context, searchQuery, searchResults_audius)
+                SearchTabLayout(context, searchQuery)
             }
         }
     }
@@ -114,8 +112,7 @@ fun SearchScreen(navController: NavController) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SearchTabLayout(context: Context, searchQuery: String,
-                      searchResults_audius: List<com.yanfiq.streamfusion.data.response.audius.Track>) {
+fun SearchTabLayout(context: Context, searchQuery: String) {
     val tabs = listOf("Audius", "SoundCloud", "Spotify", "YouTube")
     var selectedTabIndex by remember { mutableStateOf(0) }
     val pagerState = rememberPagerState(pageCount = {
@@ -149,8 +146,8 @@ fun SearchTabLayout(context: Context, searchQuery: String,
             modifier = Modifier.weight(1f)
         ) { page ->
             when (page) {
-                0 -> AudiusSearchResult(context, searchResults_audius)
-                1 -> SoundcloudSearchResult(context, searchQuery)
+                0 -> AudiusSearchResult(context = context, searchQuery = searchQuery)
+                1 -> SoundcloudSearchResult(context = context, searchQuery = searchQuery)
                 2 -> SpotifySearchResult()
                 3 -> YoutubeSearchResult()
             }
@@ -197,5 +194,5 @@ fun YoutubeSearchResult() {
 @Composable
 fun SearchScreenPreview() {
     val navController = rememberNavController()
-    SearchScreen(navController)
+    SearchScreen(navController = navController)
 }
