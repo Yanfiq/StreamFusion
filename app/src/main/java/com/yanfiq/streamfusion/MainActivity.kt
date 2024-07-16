@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
 //        ThemeUtils.applyTheme(themePref)
 
         lifecycleScope.launch {
-            AudiusEndpointUtil.initialize(this@MainActivity)
+//            AudiusEndpointUtil.initialize(this@MainActivity)
         }
     }
 

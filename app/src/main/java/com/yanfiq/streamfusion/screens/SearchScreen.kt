@@ -3,6 +3,8 @@ package com.yanfiq.streamfusion.screens
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,14 +21,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -53,22 +53,24 @@ import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.select.Elements
 import com.yanfiq.streamfusion.data.response.audius.AudiusResponse
 import com.yanfiq.streamfusion.data.retrofit.audius.AudiusEndpointUtil
-import com.yanfiq.streamfusion.screens.PlayAudiusActivity
-import com.yanfiq.streamfusion.ui.search.soundcloud.PlaySoundcloudActivity
 import com.yanfiq.streamfusion.ui.theme.AppTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import kotlin.coroutines.resume
+
 
 @Composable
 fun SearchScreen(navController: NavController) {
     var searchQuery by remember { mutableStateOf("") }
+    var searchInput by remember { mutableStateOf("") }
     val context = LocalContext.current
     var searchResults_audius by remember { mutableStateOf(emptyList<com.yanfiq.streamfusion.data.response.audius.Track>()) }
-    var searchResults_soundcloud by remember { mutableStateOf(emptyList<com.yanfiq.streamfusion.data.response.soundcloud.Track>()) }
     var searchResults_youtube by remember { mutableStateOf(emptyList<com.yanfiq.streamfusion.data.response.youtube.Video>()) }
 
     AppTheme {
@@ -85,27 +87,26 @@ fun SearchScreen(navController: NavController) {
             ) {
                 TextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
+                    value = searchInput,
+                    onValueChange = { searchInput = it },
                     placeholder = { Text(text = "Keyword") }
                 )
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
-                        search_audius(searchQuery, context) { results ->
-                            searchResults_audius = results
-                        }
+//                        search_audius(searchQuery, context) { results ->
+//                            searchResults_audius = results
+//                        }
+                        searchQuery = searchInput
                         CoroutineScope(Dispatchers.IO).launch {
-                            search_soundcloud(searchQuery, context){ results ->
-                                searchResults_soundcloud = results
-                            }
+
                         }
                     }
                 ) {
                     Text(text = "Search")
                 }
 
-                ParallelSearchTab(context, searchResults_audius, searchResults_soundcloud)
+                SearchTabLayout(context, searchQuery, searchResults_audius)
             }
         }
     }
@@ -113,9 +114,8 @@ fun SearchScreen(navController: NavController) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ParallelSearchTab(context: Context,
-                      searchResults_audius: List<com.yanfiq.streamfusion.data.response.audius.Track>,
-                      searchResults_soundcloud: List<com.yanfiq.streamfusion.data.response.soundcloud.Track>) {
+fun SearchTabLayout(context: Context, searchQuery: String,
+                      searchResults_audius: List<com.yanfiq.streamfusion.data.response.audius.Track>) {
     val tabs = listOf("Audius", "SoundCloud", "Spotify", "YouTube")
     var selectedTabIndex by remember { mutableStateOf(0) }
     val pagerState = rememberPagerState(pageCount = {
@@ -150,60 +150,11 @@ fun ParallelSearchTab(context: Context,
         ) { page ->
             when (page) {
                 0 -> AudiusSearchResult(context, searchResults_audius)
-                1 -> SoundcloudSearchResult(context, searchResults_soundcloud)
+                1 -> SoundcloudSearchResult(context, searchQuery)
                 2 -> SpotifySearchResult()
                 3 -> YoutubeSearchResult()
             }
         }
-    }
-}
-
-fun search_audius(query: String, context: Context, onResults: (List<com.yanfiq.streamfusion.data.response.audius.Track>) -> Unit) {
-    // Perform search and call onResults with the search results
-    //audius
-    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-    val limit = sharedPreferences.getString("result_per_query", "10")!!.toInt()
-    if(AudiusEndpointUtil.getUsedEndpoint() != null){
-        Log.d("AudiusSearch", AudiusEndpointUtil.getUsedEndpoint().toString())
-        val api = AudiusEndpointUtil.getApiInstance()
-        api?.searchTracks(query, limit)?.enqueue(object : Callback<AudiusResponse> {
-            override fun onResponse(call: Call<AudiusResponse>, response: Response<AudiusResponse>) {
-                if (response.isSuccessful) {
-                    val tracks = response.body()?.data ?: emptyList()
-                    onResults(tracks)
-                } else {
-                    Log.d("AudiusSearch", "Response not successful: ${response.errorBody()?.string()}")
-                    onResults(emptyList())
-                }
-            }
-
-            override fun onFailure(call: Call<AudiusResponse>, t: Throwable) {
-                Log.d("AudiusSearch", "API call failed: ${t.message}")
-                onResults(emptyList())
-            }
-        })
-    }
-
-}
-
-suspend fun search_soundcloud(query: String, context: Context, onResults: (List<com.yanfiq.streamfusion.data.response.soundcloud.Track>) -> Unit){
-    val url = "https://m.soundcloud.com/search/sounds?q=${query.replace(" ", "%20")}"
-    val doc: Document = Ksoup.parseGetRequest(url = url)
-    val songs_wrapper: Element? = doc.select(".List_VerticalList__2uQYU").first()
-    if(songs_wrapper != null){
-        val songs: Elements = songs_wrapper.select("li")
-        val tracks: MutableList<com.yanfiq.streamfusion.data.response.soundcloud.Track> = mutableListOf()
-        songs.forEach{song: Element ->
-            val title: String = song.select(".Information_CellTitle__2KitR").html()
-            val artist: String = song.select(".Information_CellSubtitle__1mXGx").html()
-            val image: String = song.select("img").attr("src")
-            val stream_url: String = song.select("a").attr("href");
-            val track = com.yanfiq.streamfusion.data.response.soundcloud.Track(title, artist, image, "soundcloud.com"+stream_url)
-            tracks.add(track)
-        }
-        onResults(tracks)
-    }else{
-        onResults(emptyList())
     }
 }
 
@@ -223,42 +174,6 @@ fun ListItem(title: String, artist: String, thumbnail_url: String, onCLick: () -
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(text = title, style = MaterialTheme.typography.titleMedium)
             Text(text = artist, style = MaterialTheme.typography.titleSmall)
-        }
-    }
-}
-
-@Composable
-fun AudiusSearchResult(context: Context, searchResults_audius: List<com.yanfiq.streamfusion.data.response.audius.Track>) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        items(searchResults_audius) { item ->
-            ListItem(item.title, item.user.name, item.artwork.small) {
-                val explicitIntent = Intent(context, PlayAudiusActivity::class.java)
-                explicitIntent.putExtra("TRACK_ID", item.id)
-                explicitIntent.putExtra("TRACK_TITLE", item.title)
-                explicitIntent.putExtra("TRACK_ARTIST", item.user.name)
-                explicitIntent.putExtra("TRACK_ARTWORK", item.artwork.large)
-                startActivity(context, explicitIntent, null)
-            }
-        }
-    }
-}
-
-@Composable
-fun SoundcloudSearchResult(context: Context, searchResults_soundcloud: List<com.yanfiq.streamfusion.data.response.soundcloud.Track>) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        items(searchResults_soundcloud) { item ->
-            ListItem(item.title, item.user, item.artwork_url ?: "") {
-                val explicitIntent = Intent(context, com.yanfiq.streamfusion.screens.PlaySoundcloudActivity::class.java)
-                explicitIntent.putExtra("TRACK_TITLE", item.title)
-                explicitIntent.putExtra("TRACK_ARTIST", item.user)
-                explicitIntent.putExtra("TRACK_ARTWORK", item.artwork_url)
-                explicitIntent.putExtra("TRACK_URL", item.stream_url)
-                startActivity(context, explicitIntent, null)
-            }
         }
     }
 }

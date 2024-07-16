@@ -87,6 +87,11 @@ dependencies {
     //coil
     implementation("io.coil-kt:coil-compose:2.6.0")
 
+    // web scrapping
+    // https://mvnrepository.com/artifact/com.fleeksoft.ksoup/ksoup
+    implementation("com.fleeksoft.ksoup:ksoup:0.1.2")
+    implementation("com.fleeksoft.ksoup:ksoup-network:0.1.2")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -110,10 +115,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("com.pierfrancescosoffritti.androidyoutubeplayer:custom-ui:12.1.0")
     implementation("androidx.security:security-crypto:1.1.0-alpha03")
-
-    // https://mvnrepository.com/artifact/com.fleeksoft.ksoup/ksoup
-    implementation("com.fleeksoft.ksoup:ksoup:0.1.2")
-    implementation("com.fleeksoft.ksoup:ksoup-network:0.1.2")
 
     implementation(libs.androidx.activity)
     implementation(libs.androidx.preference)
