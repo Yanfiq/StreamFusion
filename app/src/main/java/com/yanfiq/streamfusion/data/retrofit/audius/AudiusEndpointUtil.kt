@@ -2,11 +2,14 @@ package com.yanfiq.streamfusion.data.retrofit.audius
 
 import android.content.Context
 import android.util.Log
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
 import com.yanfiq.streamfusion.data.response.audius.AudiusResponse
 import com.yanfiq.streamfusion.data.response.audius.Track
+import com.yanfiq.streamfusion.data.viewmodel.ApiStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -27,7 +30,8 @@ object AudiusEndpointUtil {
     private val gson = Gson()
     private lateinit var trends: List<Track>;
 
-    suspend fun initialize(context: Context){
+    suspend fun initialize(context: Context, apiStatus: ApiStatus){
+        apiStatus.updateAudiusApiReady(newValue = false)
         endpointsFile = File(context.filesDir, ENDPOINTS_FILE_NAME)
         if (!endpointsFile.exists()) {
             val defaultEndpoints = listOf(
@@ -94,6 +98,7 @@ object AudiusEndpointUtil {
         }
         fetchEndpoints(context)
         setUsedEndpoint(context)
+        apiStatus.updateAudiusApiReady(true)
     }
 
     fun getEndpoints(context: Context): List<String> {

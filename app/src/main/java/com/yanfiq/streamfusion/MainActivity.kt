@@ -1,5 +1,6 @@
 package com.yanfiq.streamfusion
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -22,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,11 +42,13 @@ import com.yanfiq.streamfusion.data.retrofit.audius.AudiusEndpointUtil
 import com.yanfiq.streamfusion.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.yanfiq.streamfusion.data.retrofit.spotify.SpotifyApi
+import com.yanfiq.streamfusion.data.viewmodel.ApiStatus
 import com.yanfiq.streamfusion.ui.home.HomeFragment
 import com.yanfiq.streamfusion.ui.search.SearchFragment
 import com.yanfiq.streamfusion.ui.settings.SettingsFragment
@@ -53,29 +57,22 @@ import com.yanfiq.streamfusion.ui.theme.AppTheme
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent{
-            MainScreen()
+            MainScreen(this@MainActivity)
         }
 //        SpotifyApi.initialize(this)
 
 //        val themePref = ThemeUtils.getThemePreference(this)
 //        ThemeUtils.applyTheme(themePref)
-
-        lifecycleScope.launch {
-            AudiusEndpointUtil.initialize(this@MainActivity)
-        }
     }
 
-    @Preview
     @Composable
-    fun MainScreen() {
+    fun MainScreen(context: Context) {
         AppTheme {
             Column {
-                BottomNavigationBar()
+                BottomNavigationBar(context)
             }
         }
     }

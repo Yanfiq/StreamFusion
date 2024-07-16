@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -24,6 +25,7 @@ import androidx.preference.PreferenceManager
 import com.yanfiq.streamfusion.data.response.audius.AudiusResponse
 import com.yanfiq.streamfusion.data.response.audius.Track
 import com.yanfiq.streamfusion.data.retrofit.audius.AudiusEndpointUtil
+import com.yanfiq.streamfusion.data.viewmodel.ApiStatus
 import com.yanfiq.streamfusion.data.viewmodel.SearchResult
 import com.yanfiq.streamfusion.data.viewmodel.SearchStatus
 import retrofit2.Call
@@ -57,12 +59,24 @@ fun search_audius(query: String, context: Context, onResults: (List<Track>) -> U
 }
 
 @Composable
-fun AudiusSearchResult(searchResult: SearchResult = viewModel(), searchStatus: SearchStatus = viewModel(), context: Context, searchQuery: String) {
+fun AudiusSearchResult(searchResult: SearchResult, searchStatus: SearchStatus, apiStatus: ApiStatus, context: Context, searchQuery: String) {
     val searchResults_audius: List<Track> by searchResult.audiusSearchData.observeAsState(initial = emptyList())
     val isSearching by searchStatus.audiusSearchStatus.observeAsState(initial = false)
+    val isReady by apiStatus.audiusApiReady.observeAsState(initial = false)
+    val pendingSearchQuery by searchStatus.pendingSearchQuery.observeAsState(initial = null)
 
-    if(isSearching){
-        search_audius(searchQuery, context){ result ->
+    // Update pending search query when search is initiated
+    LaunchedEffect(searchQuery) {
+        if (!isReady) {
+            searchStatus.setPendingSearchQuery(searchQuery)
+            Log.d("AudiusSearch", "Pending search: ${searchQuery}")
+        }
+    }
+
+    // Perform the search when both conditions are met
+    if (isSearching && isReady) {
+        Log.d("AudiusSearch", "Starting search: ${searchQuery}")
+        search_audius(searchQuery, context) { result ->
             searchResult.updateAudiusSearchData(result)
             searchStatus.updateAudiusSearchStatus(false)
         }
@@ -75,7 +89,8 @@ fun AudiusSearchResult(searchResult: SearchResult = viewModel(), searchStatus: S
                 .height((LocalConfiguration.current.screenHeightDp).dp),
         ) {
             CircularProgressIndicator(
-                modifier = Modifier.width(64.dp)
+                modifier = Modifier
+                    .width(64.dp)
                     .align(Alignment.Center),
                 color = MaterialTheme.colorScheme.secondary,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,

@@ -1,6 +1,7 @@
 package com.yanfiq.streamfusion
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -10,21 +11,28 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.yanfiq.streamfusion.data.retrofit.audius.AudiusEndpointUtil
+import com.yanfiq.streamfusion.data.viewmodel.ApiStatus
+import com.yanfiq.streamfusion.data.viewmodel.SearchResult
+import com.yanfiq.streamfusion.data.viewmodel.SearchStatus
 import com.yanfiq.streamfusion.screens.HomeScreen
 import com.yanfiq.streamfusion.screens.SearchScreen
 import com.yanfiq.streamfusion.screens.SettingsScreen
 
 @Composable
-fun BottomNavigationBar() {
+fun BottomNavigationBar(context: Context) {
 //initializing the default selected item
     var navigationSelectedItem by remember {
         mutableStateOf(0)
@@ -34,6 +42,14 @@ fun BottomNavigationBar() {
      * we can get the instance of the navController
      */
     val navController = rememberNavController()
+
+    val searchStatus: SearchStatus = viewModel()
+    val searchResult: SearchResult = viewModel()
+    val apiStatus: ApiStatus = viewModel()
+
+    LaunchedEffect(Unit) {
+        AudiusEndpointUtil.initialize(context, apiStatus)
+    }
 
 //scaffold to hold our bottom navigation Bar
     Scaffold(
@@ -91,6 +107,9 @@ fun BottomNavigationBar() {
             }
             composable(Screens.Search.route) {
                 SearchScreen(
+                    apiStatus = apiStatus,
+                    searchResult = searchResult,
+                    searchStatus = searchStatus,
                     navController = navController
                 )
             }

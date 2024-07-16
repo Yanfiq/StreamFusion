@@ -51,7 +51,7 @@ class JsInterface(private val onResult: (String) -> Unit) {
 }
 
 @Composable
-fun SoundcloudSearchResult(searchResult: SearchResult = viewModel(), searchStatus: SearchStatus = viewModel(), context: Context, searchQuery: String) {
+fun SoundcloudSearchResult(searchResult: SearchResult, searchStatus: SearchStatus, context: Context, searchQuery: String) {
     val searchResults by searchResult.soundcloudSearchData.observeAsState(initial = emptyList())
     val isSearching by searchStatus.soundcloudSearchStatus.observeAsState(initial = false)
     var url by remember { mutableStateOf("") }

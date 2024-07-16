@@ -55,6 +55,7 @@ import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.select.Elements
 import com.yanfiq.streamfusion.data.response.audius.AudiusResponse
 import com.yanfiq.streamfusion.data.retrofit.audius.AudiusEndpointUtil
+import com.yanfiq.streamfusion.data.viewmodel.ApiStatus
 import com.yanfiq.streamfusion.data.viewmodel.SearchResult
 import com.yanfiq.streamfusion.data.viewmodel.SearchStatus
 import com.yanfiq.streamfusion.ui.theme.AppTheme
@@ -70,7 +71,7 @@ import kotlin.coroutines.resume
 
 
 @Composable
-fun SearchScreen(searchResult: SearchResult = viewModel(), searchStatus: SearchStatus = viewModel(), navController: NavController) {
+fun SearchScreen(searchResult: SearchResult, searchStatus: SearchStatus, apiStatus: ApiStatus, navController: NavController) {
     var searchQuery by remember { mutableStateOf("") }
     var searchInput by remember { mutableStateOf("") }
     val context = LocalContext.current
@@ -104,7 +105,7 @@ fun SearchScreen(searchResult: SearchResult = viewModel(), searchStatus: SearchS
                     Text(text = "Search")
                 }
 
-                SearchTabLayout(context, searchQuery)
+                SearchTabLayout(searchResult, searchStatus, apiStatus, context, searchQuery)
             }
         }
     }
@@ -112,7 +113,7 @@ fun SearchScreen(searchResult: SearchResult = viewModel(), searchStatus: SearchS
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SearchTabLayout(context: Context, searchQuery: String) {
+fun SearchTabLayout(searchResult: SearchResult, searchStatus: SearchStatus, apiStatus: ApiStatus,context: Context, searchQuery: String) {
     val tabs = listOf("Audius", "SoundCloud", "Spotify", "YouTube")
     var selectedTabIndex by remember { mutableStateOf(0) }
     val pagerState = rememberPagerState(pageCount = {
@@ -146,8 +147,8 @@ fun SearchTabLayout(context: Context, searchQuery: String) {
             modifier = Modifier.weight(1f)
         ) { page ->
             when (page) {
-                0 -> AudiusSearchResult(context = context, searchQuery = searchQuery)
-                1 -> SoundcloudSearchResult(context = context, searchQuery = searchQuery)
+                0 -> AudiusSearchResult(apiStatus = apiStatus, searchResult = searchResult, searchStatus = searchStatus, context = context, searchQuery = searchQuery)
+                1 -> SoundcloudSearchResult(searchResult = searchResult, searchStatus = searchStatus, context = context, searchQuery = searchQuery)
                 2 -> SpotifySearchResult()
                 3 -> YoutubeSearchResult()
             }
@@ -189,10 +190,10 @@ fun YoutubeSearchResult() {
     }
 }
 
-
-@Preview(showBackground = true)
-@Composable
-fun SearchScreenPreview() {
-    val navController = rememberNavController()
-    SearchScreen(navController = navController)
-}
+//
+//@Preview(showBackground = true)
+//@Composable
+//fun SearchScreenPreview() {
+//    val navController = rememberNavController()
+//    SearchScreen(navController = navController)
+//}
