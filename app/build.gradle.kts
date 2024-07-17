@@ -92,6 +92,10 @@ dependencies {
     implementation("com.fleeksoft.ksoup:ksoup:0.1.2")
     implementation("com.fleeksoft.ksoup:ksoup-network:0.1.2")
 
+    //setting
+    implementation(libs.composeprefs3)
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

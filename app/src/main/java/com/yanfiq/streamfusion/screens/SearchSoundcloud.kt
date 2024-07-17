@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -31,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat.startActivity
@@ -42,6 +44,8 @@ import com.fleeksoft.ksoup.select.Elements
 import com.yanfiq.streamfusion.data.response.soundcloud.Track
 import com.yanfiq.streamfusion.data.viewmodel.SearchResult
 import com.yanfiq.streamfusion.data.viewmodel.SearchStatus
+import com.yanfiq.streamfusion.dataStore
+import kotlinx.coroutines.flow.map
 
 class JsInterface(private val onResult: (String) -> Unit) {
     @JavascriptInterface
@@ -55,7 +59,9 @@ fun SoundcloudSearchResult(searchResult: SearchResult, searchStatus: SearchStatu
     val searchResults by searchResult.soundcloudSearchData.observeAsState(initial = emptyList())
     val isSearching by searchStatus.soundcloudSearchStatus.observeAsState(initial = false)
     var url by remember { mutableStateOf("") }
-    var result_desired: Int = 30
+    val result_desired by (LocalContext.current.dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.RESULT_PER_SEARCH] ?: 10f
+    }).collectAsState(initial = 10f)
 
     if(isSearching){
         url = "https://m.soundcloud.com/search/sounds?q=${searchQuery.replace(" ", "%20")}"
@@ -89,7 +95,7 @@ fun SoundcloudSearchResult(searchResult: SearchResult, searchStatus: SearchStatu
                                     evaluateJavascript(
                                         """
                                     (function(){
-                                        let result_desired = ${result_desired};
+                                        let result_desired = ${result_desired.toInt()};
                                         let result_acquired = 0;
                                     
                                         let interval = setInterval(

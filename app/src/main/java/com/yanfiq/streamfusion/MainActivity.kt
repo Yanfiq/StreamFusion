@@ -32,6 +32,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
@@ -54,9 +57,11 @@ import com.yanfiq.streamfusion.ui.search.SearchFragment
 import com.yanfiq.streamfusion.ui.settings.SettingsFragment
 import com.yanfiq.streamfusion.ui.settings.ThemeUtils
 import com.yanfiq.streamfusion.ui.theme.AppTheme
+import com.jamal.composeprefs3.ui.LocalPrefsDataStore
+
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 class MainActivity : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent{

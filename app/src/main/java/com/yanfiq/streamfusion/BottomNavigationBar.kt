@@ -17,6 +17,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -114,9 +116,7 @@ fun BottomNavigationBar(context: Context) {
                 )
             }
             composable(Screens.Settings.route) {
-                SettingsScreen(
-                    navController = navController
-                )
+                SettingsScreen()
             }
         }
     }
