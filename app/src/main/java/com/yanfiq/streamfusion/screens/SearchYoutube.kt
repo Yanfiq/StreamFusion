@@ -126,15 +126,16 @@ fun YoutubeSearchResult(searchResult: SearchResult, searchStatus: SearchStatus, 
         ) {
             items(searchResults) { item ->
                 ListItem(item.title, item.channel, item.thumbnailUrl ?: "") {
-//                    val explicitIntent = Intent(
-//                        context,
-//                        com.yanfiq.streamfusion.screens.PlayYou
-//                    )
-//                    explicitIntent.putExtra("TRACK_TITLE", item.title)
-//                    explicitIntent.putExtra("TRACK_ARTIST", item.user)
-//                    explicitIntent.putExtra("TRACK_ARTWORK", item.artwork_url)
-//                    explicitIntent.putExtra("TRACK_URL", item.stream_url)
-//                    startActivity(context, explicitIntent, null)
+                    val explicitIntent = Intent(
+                        context,
+                        PlayYoutubeActivity::class.java
+                    )
+                    explicitIntent.putExtra("VIDEO_ID", item.id)
+                    explicitIntent.putExtra("VIDEO_TITLE", item.title)
+                    explicitIntent.putExtra("VIDEO_CREATOR", item.channel)
+                    explicitIntent.putExtra("VIDEO_ARTWORK", item.thumbnailUrl)
+                    explicitIntent.putExtra("VIDEO_DURATION", item.duration)
+                    startActivity(context, explicitIntent, null)
                 }
             }
         }
