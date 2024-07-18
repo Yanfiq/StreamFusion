@@ -1,9 +1,15 @@
 package com.yanfiq.streamfusion.screens
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,7 +35,7 @@ import com.yanfiq.streamfusion.dataStore
 import com.yanfiq.streamfusion.ui.theme.AppTheme
 import kotlinx.coroutines.flow.map
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(dataStore: DataStore<Preferences> = LocalContext.current.dataStore) {
     val scope = rememberCoroutineScope()
@@ -42,34 +48,61 @@ fun SettingsScreen(dataStore: DataStore<Preferences> = LocalContext.current.data
         preferences[PreferencesKeys.RESULT_PER_SEARCH] ?: 10f
     }).collectAsState(initial = 10f)
 
+    val youtubeApiKey by (dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.YOUTUBE_API_KEY] ?: ""
+    }).collectAsState(initial = "")
+
     AppTheme {
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(5.dp),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            PrefsScreen(dataStore) {
-                prefsGroup("General") {
-                    prefsItem {
-                        SwitchPref(key = "switch_dark_mode",
-                            title = "Dark mode",
-                            defaultChecked = isDark
-                        )
-                    }
-                    prefsItem {
-                        SliderPref(
-                            key = "result_per_search",
-                            title = "Result per search",
-                            valueRange = 10f..100f,
-                            steps = 8,
-                            defaultValue = maxResult,
-                            showValue = true
-                        )
+        Scaffold (
+            topBar = {
+                TopAppBar(
+                    title = { Text("Settings") },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TopAppBarDefaults.mediumTopAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                )
+            },
+            content = {padding ->
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    PrefsScreen(dataStore) {
+                        prefsGroup("General") {
+                            prefsItem {
+                                SwitchPref(key = "switch_dark_mode",
+                                    title = "Dark mode",
+                                    defaultChecked = isDark
+                                )
+                            }
+                            prefsItem {
+                                SliderPref(
+                                    key = "result_per_search",
+                                    title = "Result per search",
+                                    valueRange = 10f..100f,
+                                    steps = 8,
+                                    defaultValue = maxResult,
+                                    showValue = true
+                                )
+                            }
+                        }
+                        prefsGroup("Advanced") {
+                            prefsItem {
+                                EditTextPref(
+                                    key = "youtube_api_key",
+                                    title = "YouTube API key",
+                                    summary = youtubeApiKey
+                                )
+                            }
+                        }
                     }
                 }
             }
-        }
+        )
     }
 }
 

@@ -7,11 +7,11 @@ import androidx.lifecycle.ViewModel
 class SearchStatus : ViewModel() {
     private val _soundcloudSearchStatus = MutableLiveData<Boolean>()
     private val _audiusSearchStatus = MutableLiveData<Boolean>()
-    private val _pendingSearchQuery = MutableLiveData<String?>()
+    private val _youtubeSearchStatus = MutableLiveData<Boolean>()
 
     val soundcloudSearchStatus: LiveData<Boolean> get() = _soundcloudSearchStatus
     val audiusSearchStatus: LiveData<Boolean> get() = _audiusSearchStatus
-    val pendingSearchQuery: LiveData<String?> get() = _pendingSearchQuery
+    val youtubeSearchStatus: LiveData<Boolean> get() = _youtubeSearchStatus
 
     fun updateSoundcloudSearchStatus(newData: Boolean){
         _soundcloudSearchStatus.postValue(newData)
@@ -21,6 +21,13 @@ class SearchStatus : ViewModel() {
         _audiusSearchStatus.postValue(newData)
     }
 
+    fun updateYoutubeSearchStatus(newData: Boolean){
+        _youtubeSearchStatus.postValue(newData)
+    }
+
+
+    private val _pendingSearchQuery = MutableLiveData<String?>()
+    val pendingSearchQuery: LiveData<String?> get() = _pendingSearchQuery
     fun setPendingSearchQuery(query: String?) {
         _pendingSearchQuery.postValue(query)
     }

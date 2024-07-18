@@ -50,7 +50,7 @@ fun BottomNavigationBar(context: Context) {
     val apiStatus: ApiStatus = viewModel()
 
     LaunchedEffect(Unit) {
-        AudiusEndpointUtil.initialize(context, apiStatus)
+//        AudiusEndpointUtil.initialize(context, apiStatus)
     }
 
 //scaffold to hold our bottom navigation Bar

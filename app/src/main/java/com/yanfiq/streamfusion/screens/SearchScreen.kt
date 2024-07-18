@@ -5,7 +5,10 @@ import android.content.Intent
 import android.util.Log
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,13 +25,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +48,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -70,6 +82,7 @@ import retrofit2.Response
 import kotlin.coroutines.resume
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(searchResult: SearchResult, searchStatus: SearchStatus, apiStatus: ApiStatus, navController: NavController) {
     var searchQuery by remember { mutableStateOf("") }
@@ -77,37 +90,60 @@ fun SearchScreen(searchResult: SearchResult, searchStatus: SearchStatus, apiStat
     val context = LocalContext.current
 
     AppTheme {
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(5.dp),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top
-            ) {
-                TextField(
+        Scaffold (
+            topBar = {
+                TopAppBar(
+                    title = { Text("Search") },
                     modifier = Modifier.fillMaxWidth(),
-                    value = searchInput,
-                    onValueChange = { searchInput = it },
-                    placeholder = { Text(text = "Keyword") }
+                    colors = TopAppBarDefaults.mediumTopAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    )
                 )
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        searchStatus.updateSoundcloudSearchStatus(true)
-                        searchStatus.updateAudiusSearchStatus(true)
-                        searchQuery = searchInput
-                    }
+            },
+            content = {padding ->
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    color = MaterialTheme.colorScheme.background
                 ) {
-                    Text(text = "Search")
-                }
+                    TopAppBar(title = {
+                        Text(text = "Search")
+                    })
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Top
+                    ) {
+                        TextField(
+                            modifier = Modifier.fillMaxWidth(),
+                            value = searchInput,
+                            onValueChange = { searchInput = it },
+                            placeholder = { Text(text = "Keyword") },
+                            colors = TextFieldDefaults.colors(
+                                unfocusedContainerColor = Color.Transparent,
+                                focusedContainerColor = Color.Transparent
+                            )
+                        )
+                        Button(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = {
+//                                searchStatus.updateSoundcloudSearchStatus(true)
+//                                searchStatus.updateAudiusSearchStatus(true)
+                                searchStatus.updateYoutubeSearchStatus(true)
+                                searchQuery = searchInput
+                            }
+                        ) {
+                            Icon(imageVector = Icons.Filled.Search, contentDescription = "Search Icon")
+                            Text(text = "Search")
+                        }
 
-                SearchTabLayout(searchResult, searchStatus, apiStatus, context, searchQuery)
+                        SearchTabLayout(searchResult, searchStatus, apiStatus, context, searchQuery)
+                    }
+                }
             }
-        }
+        )
     }
 }
 
@@ -150,7 +186,7 @@ fun SearchTabLayout(searchResult: SearchResult, searchStatus: SearchStatus, apiS
                 0 -> AudiusSearchResult(apiStatus = apiStatus, searchResult = searchResult, searchStatus = searchStatus, context = context, searchQuery = searchQuery)
                 1 -> SoundcloudSearchResult(searchResult = searchResult, searchStatus = searchStatus, context = context, searchQuery = searchQuery)
                 2 -> SpotifySearchResult()
-                3 -> YoutubeSearchResult()
+                3 -> YoutubeSearchResult(searchResult = searchResult, searchStatus = searchStatus, context = context, searchQuery = searchQuery)
             }
         }
     }
@@ -183,17 +219,13 @@ fun SpotifySearchResult() {
     }
 }
 
-@Composable
-fun YoutubeSearchResult() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Content for Tab 4")
-    }
-}
-
 //
-//@Preview(showBackground = true)
-//@Composable
-//fun SearchScreenPreview() {
-//    val navController = rememberNavController()
-//    SearchScreen(navController = navController)
-//}
+@Preview(showBackground = true)
+@Composable
+fun SearchScreenPreview() {
+    val navController = rememberNavController()
+    val searchStatus: SearchStatus = viewModel()
+    val searchResult: SearchResult = viewModel()
+    val apiStatus: ApiStatus = viewModel()
+    SearchScreen(searchResult, searchStatus, apiStatus, navController)
+}
