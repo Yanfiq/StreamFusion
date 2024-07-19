@@ -1,9 +1,8 @@
-package com.yanfiq.youcloudify.data.response.soundcloud
+package com.yanfiq.streamfusion.data.response.soundcloud
 
 data class Track(
-    val id: Int,
     val title: String,
-    val user: User,
+    val user: String,
     val artwork_url: String?,
     val stream_url: String
 )

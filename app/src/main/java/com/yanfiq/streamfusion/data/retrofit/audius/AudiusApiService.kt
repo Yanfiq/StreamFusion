@@ -20,9 +20,13 @@ interface AudiusApiService {
     @GET("v1/tracks/search")
     fun searchTracks(
         @Query("query") query: String,
-        @Query("limit") limit: Int = 10
+        @Query("limit") limit: Int = 10,
+        @Query("app_name") appName: String = "StreamFusion"
     ): Call<AudiusResponse>
 
     @GET("v1/tracks/{track_id}/stream")
-    fun streamTrack(@Path("track_id") trackId: String, @Query("app_name") appName: String = "StreamFusion"): Call<ResponseBody>
+    fun streamTrack(
+        @Path("track_id") trackId: String,
+        @Query("app_name") appName: String = "StreamFusion"
+    ): Call<ResponseBody>
 }

@@ -5,9 +5,10 @@
     android:layout_height="match_parent"
     tools:context=".ui.search.soundcloud.SearchSoundcloudFragment">
 
-    <WebView
-        android:id="@+id/webview_soundcloud"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_soundcloud"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:layout_marginTop="16dp" />
 
 </FrameLayout>

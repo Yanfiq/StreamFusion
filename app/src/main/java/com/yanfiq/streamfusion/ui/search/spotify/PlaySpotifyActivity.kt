@@ -42,4 +42,9 @@ class PlaySpotifyActivity : AppCompatActivity() {
             webView.loadUrl(url)
         }
     }
+
+    override fun onDestroy() {
+        webView.destroy()
+        super.onDestroy()
+    }
 }

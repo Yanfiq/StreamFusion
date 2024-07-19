@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.yanfiq.streamfusion.R
-import com.yanfiq.youcloudify.data.response.spotify.Track
+import com.yanfiq.streamfusion.data.response.spotify.Track
 
 class TrackAdapter(private var tracks: List<Track>) : RecyclerView.Adapter<TrackAdapter.TrackViewHolder>() {
 

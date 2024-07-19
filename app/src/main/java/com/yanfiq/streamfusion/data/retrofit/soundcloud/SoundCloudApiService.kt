@@ -1,6 +1,6 @@
 package com.yanfiq.streamfusion.data.retrofit.soundcloud
 
-import com.yanfiq.youcloudify.data.response.soundcloud.Track
+import com.yanfiq.streamfusion.data.response.soundcloud.Track
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query
