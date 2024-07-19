@@ -36,12 +36,12 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-fun search_audius(query: String, resultCount: Int, context: Context, onResults: (List<Track>) -> Unit) {
+fun searchAudius(query: String, limit: Int, context: Context, onResults: (List<Track>) -> Unit) {
     //audius
     if(AudiusEndpointUtil.getUsedEndpoint() != null){
-        Log.d("AudiusSearch", "Start searching ${query} with ${resultCount} as the limit")
+        Log.d("AudiusSearch", "Start searching ${query} with ${limit} as the limit")
         val api = AudiusEndpointUtil.getApiInstance()
-        api?.searchTracks(query, resultCount)?.enqueue(object : Callback<AudiusResponse> {
+        api?.searchTracks(query, limit)?.enqueue(object : Callback<AudiusResponse> {
             override fun onResponse(call: Call<AudiusResponse>, response: Response<AudiusResponse>) {
                 if (response.isSuccessful) {
                     val tracks = response.body()?.data ?: emptyList()
@@ -70,23 +70,6 @@ fun AudiusSearchResult(searchResult: SearchResult, searchStatus: SearchStatus, a
     val maxResult by (LocalContext.current.dataStore.data.map { preferences ->
         preferences[PreferencesKeys.RESULT_PER_SEARCH] ?: 10f
     }).collectAsState(initial = 10f)
-
-    // Update pending search query when search is initiated
-    LaunchedEffect(searchQuery) {
-        if (!isReady) {
-            searchStatus.setPendingSearchQuery(searchQuery)
-            Log.d("AudiusSearch", "Pending search: ${searchQuery}")
-        }
-    }
-
-    // Perform the search when both conditions are met
-    if (isSearching && isReady) {
-        Log.d("AudiusSearch", "Starting search: ${searchQuery}")
-        search_audius(searchQuery, maxResult.toInt(), context) { result ->
-            searchResult.updateAudiusSearchData(result)
-            searchStatus.updateAudiusSearchStatus(false)
-        }
-    }
 
     if (isSearching){
         Box(

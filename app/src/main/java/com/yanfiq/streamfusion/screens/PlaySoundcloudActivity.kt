@@ -206,7 +206,7 @@ fun WebViewScreen_HtmlString(
 
 @Preview
 @Composable
-fun preview_soundcloud_play(){
+private fun Preview_soundcloud_play(){
     val context = LocalContext.current
     SoundcloudPlayScreen(
         trackUrl = "Acumalaka",

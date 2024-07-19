@@ -41,7 +41,11 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -70,9 +74,11 @@ import com.yanfiq.streamfusion.data.retrofit.audius.AudiusEndpointUtil
 import com.yanfiq.streamfusion.data.viewmodel.ApiStatus
 import com.yanfiq.streamfusion.data.viewmodel.SearchResult
 import com.yanfiq.streamfusion.data.viewmodel.SearchStatus
+import com.yanfiq.streamfusion.dataStore
 import com.yanfiq.streamfusion.ui.theme.AppTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -88,6 +94,19 @@ fun SearchScreen(searchResult: SearchResult, searchStatus: SearchStatus, apiStat
     var searchQuery by remember { mutableStateOf("") }
     var searchInput by remember { mutableStateOf("") }
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    val isAudiusSearching by searchStatus.audiusSearchStatus.observeAsState(initial = false)
+    val isSoundcloudSearching by searchStatus.soundcloudSearchStatus.observeAsState(initial = false)
+    val isYoutubeSearching by searchStatus.youtubeSearchStatus.observeAsState(initial = false)
+
+    val isAudiusReady by apiStatus.audiusApiReady.observeAsState(initial = false)
+    val maxResult by (LocalContext.current.dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.RESULT_PER_SEARCH] ?: 10f
+    }).collectAsState(initial = 10f)
+    val youtubeApiKey by (LocalContext.current.dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.YOUTUBE_API_KEY] ?: ""
+    }).collectAsState(initial = "")
 
     AppTheme {
         Scaffold (
@@ -108,38 +127,70 @@ fun SearchScreen(searchResult: SearchResult, searchStatus: SearchStatus, apiStat
                         .padding(padding),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    TopAppBar(title = {
-                        Text(text = "Search")
-                    })
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Top
-                    ) {
-                        TextField(
-                            modifier = Modifier.fillMaxWidth(),
-                            value = searchInput,
-                            onValueChange = { searchInput = it },
-                            placeholder = { Text(text = "Keyword") },
-                            colors = TextFieldDefaults.colors(
-                                unfocusedContainerColor = Color.Transparent,
-                                focusedContainerColor = Color.Transparent
-                            )
-                        )
-                        Button(
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = {
-//                                searchStatus.updateSoundcloudSearchStatus(true)
-//                                searchStatus.updateAudiusSearchStatus(true)
-                                searchStatus.updateYoutubeSearchStatus(true)
-                                searchQuery = searchInput
-                            }
-                        ) {
-                            Icon(imageVector = Icons.Filled.Search, contentDescription = "Search Icon")
-                            Text(text = "Search")
-                        }
+                    Box(modifier = Modifier.fillMaxSize())  {
 
-                        SearchTabLayout(searchResult, searchStatus, apiStatus, context, searchQuery)
+                        // soundcloud workaround
+                        if(isSoundcloudSearching){
+                            Log.d("SoundcloudSearch", "Starting search: ${searchQuery}")
+                            searchSoundcloud(context = context, query = searchQuery, limit = maxResult.toInt()) { result ->
+                                searchResult.updateSoundcloudSearchData(result)
+                                searchStatus.updateSoundcloudSearchStatus(false)
+                            }
+                        }
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Top
+                        ) {
+                            TextField(
+                                modifier = Modifier.fillMaxWidth(),
+                                value = searchInput,
+                                onValueChange = { searchInput = it },
+                                placeholder = { Text(text = "Keyword") },
+                                colors = TextFieldDefaults.colors(
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedContainerColor = Color.Transparent
+                                )
+                            )
+                            Button(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                    searchQuery = searchInput
+
+                                    //soundcloud
+                                    searchStatus.updateSoundcloudSearchStatus(true)
+
+                                    //audius
+                                    searchStatus.updateAudiusSearchStatus(true)
+                                    if (!isAudiusReady) {
+                                        searchStatus.setPendingSearchQuery(searchQuery)
+                                        Log.d("AudiusSearch", "Pending search: ${searchQuery}")
+                                    }
+                                    // Perform the search when both conditions are met
+                                    if (isAudiusSearching && isAudiusReady) {
+                                        Log.d("AudiusSearch", "Starting search: ${searchQuery}")
+                                        searchAudius(searchQuery, maxResult.toInt(), context) { result ->
+                                            searchResult.updateAudiusSearchData(result)
+                                            searchStatus.updateAudiusSearchStatus(false)
+                                        }
+                                    }
+
+                                    //youtube
+                                    searchStatus.updateYoutubeSearchStatus(true)
+                                    coroutineScope.launch {
+                                        searchYouTube(context, searchQuery, maxResult.toInt(), youtubeApiKey){response ->
+                                            searchResult.updateYoutubeSearchData(response)
+                                            searchStatus.updateYoutubeSearchStatus(false)
+                                        }
+                                    }
+                                }
+                            ) {
+                                Icon(imageVector = Icons.Filled.Search, contentDescription = "Search Icon")
+                                Text(text = "Search")
+                            }
+
+                            SearchTabLayout(searchResult = searchResult, searchStatus = searchStatus, apiStatus = apiStatus, context = context, searchQuery = searchQuery)
+                        }
                     }
                 }
             }
@@ -149,9 +200,10 @@ fun SearchScreen(searchResult: SearchResult, searchStatus: SearchStatus, apiStat
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SearchTabLayout(searchResult: SearchResult, searchStatus: SearchStatus, apiStatus: ApiStatus,context: Context, searchQuery: String) {
+fun SearchTabLayout(searchResult: SearchResult, searchStatus: SearchStatus, apiStatus: ApiStatus, context: Context, searchQuery: String) {
     val tabs = listOf("Audius", "SoundCloud", "Spotify", "YouTube")
     var selectedTabIndex by remember { mutableStateOf(0) }
+    val pageCount = 5
     val pagerState = rememberPagerState(pageCount = {
         4
     })
