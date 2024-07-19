@@ -17,9 +17,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "YoutubeApiKey", project.properties["YoutubeApiKey"].toString())
-        buildConfigField("String", "SpotifyClientId", project.properties["SpotifyClientId"].toString())
-        buildConfigField("String", "SpotifyClientSecret", project.properties["SpotifyClientSecret"].toString())
     }
 
     buildTypes {
@@ -42,7 +39,6 @@ android {
         kotlinCompilerExtensionVersion = "1.5.2"
     }
     buildFeatures {
-        buildConfig = true
         viewBinding = true
         compose = true
     }
