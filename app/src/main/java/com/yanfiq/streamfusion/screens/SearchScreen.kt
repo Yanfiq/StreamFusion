@@ -128,15 +128,6 @@ fun SearchScreen(searchResult: SearchResult, searchStatus: SearchStatus, apiStat
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Box(modifier = Modifier.fillMaxSize())  {
-
-                        // soundcloud workaround
-                        if(isSoundcloudSearching){
-                            Log.d("SoundcloudSearch", "Starting search: ${searchQuery}")
-                            searchSoundcloud(context = context, query = searchQuery, limit = maxResult.toInt()) { result ->
-                                searchResult.updateSoundcloudSearchData(result)
-                                searchStatus.updateSoundcloudSearchStatus(false)
-                            }
-                        }
                         Column(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -159,6 +150,15 @@ fun SearchScreen(searchResult: SearchResult, searchStatus: SearchStatus, apiStat
 
                                     //soundcloud
                                     searchStatus.updateSoundcloudSearchStatus(true)
+                                    Log.d("SoundcloudSearch", "Starting search: ${searchQuery}")
+                                    searchSoundcloud(
+                                        context = context,
+                                        query = searchQuery,
+                                        limit = maxResult.toInt()
+                                    ) { result ->
+                                        searchResult.updateSoundcloudSearchData(result)
+                                        searchStatus.updateSoundcloudSearchStatus(false)
+                                    }
 
                                     //audius
                                     searchStatus.updateAudiusSearchStatus(true)
@@ -177,10 +177,12 @@ fun SearchScreen(searchResult: SearchResult, searchStatus: SearchStatus, apiStat
 
                                     //youtube
                                     searchStatus.updateYoutubeSearchStatus(true)
-                                    coroutineScope.launch {
-                                        searchYouTube(context, searchQuery, maxResult.toInt(), youtubeApiKey){response ->
-                                            searchResult.updateYoutubeSearchData(response)
-                                            searchStatus.updateYoutubeSearchStatus(false)
+                                    if(youtubeApiKey != ""){
+                                        coroutineScope.launch {
+                                            searchYouTube(context, searchQuery, maxResult.toInt(), youtubeApiKey){response ->
+                                                searchResult.updateYoutubeSearchData(response)
+                                                searchStatus.updateYoutubeSearchStatus(false)
+                                            }
                                         }
                                     }
                                 }

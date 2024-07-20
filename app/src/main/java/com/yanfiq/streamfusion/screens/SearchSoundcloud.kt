@@ -1,17 +1,20 @@
 package com.yanfiq.streamfusion.screens
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.FrameLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -59,21 +62,29 @@ class JsInterface(private val onResult: (String) -> Unit) {
     }
 }
 
-@Composable
-fun searchSoundcloud(context: Context, query: String, limit: Int, onResponse: (List<Track>) -> Unit){
+fun searchSoundcloud(
+    context: Context,
+    query: String,
+    limit: Int,
+    onResponse: (List<Track>) -> Unit
+) {
     val url = "https://m.soundcloud.com/search/sounds?q=${query.replace(" ", "%20")}"
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        AndroidView(
-            modifier = Modifier.width(500.dp).height(500.dp),
-            factory = { context ->
-                WebView(context).apply {
-                    settings.javaScriptEnabled = true
-                    settings.domStorageEnabled = true
-                    webViewClient = object : WebViewClient() {
-                        override fun onPageFinished(view: WebView?, url: String?) {
-                            evaluateJavascript(
-                                """
+    // Create a FrameLayout to hold the WebView
+    val frameLayout = FrameLayout(context).apply {
+        layoutParams = ViewGroup.LayoutParams(1, 1) // Smallest size possible to be hidden
+    }
+
+    val webView = WebView(context).apply {
+        layoutParams = ViewGroup.LayoutParams(1200, 3000)
+        settings.javaScriptEnabled = true
+        settings.domStorageEnabled = true
+        settings.loadWithOverviewMode = true
+        settings.useWideViewPort = true
+        webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                evaluateJavascript(
+                    """
                                     (function(){
                                         let result_desired = ${limit};
                                         let result_acquired = 0;
@@ -94,53 +105,60 @@ fun searchSoundcloud(context: Context, query: String, limit: Int, onResponse: (L
                                         )
                                     })();
                                     """.trimIndent()
-                            ) {  }
-                        }
+                ) { }
+            }
 
-                        override fun onReceivedError(
-                            view: WebView?,
-                            request: WebResourceRequest?,
-                            error: WebResourceError?
-                        ) {
-                            super.onReceivedError(view, request, error)
-                        }
+            override fun onReceivedError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                error: WebResourceError?
+            ) {
+                super.onReceivedError(view, request, error)
+            }
 
-                        override fun onReceivedHttpError(
-                            view: WebView?,
-                            request: WebResourceRequest?,
-                            errorResponse: WebResourceResponse?
-                        ) {
-                            super.onReceivedHttpError(view, request, errorResponse)
-                        }
-                    }
-                    addJavascriptInterface(JsInterface { value ->
-                        val doc: Document = Ksoup.parse(value)
-                        val songsWrapper: Element? = doc.select(".List_VerticalList__2uQYU").first()
-                        if (songsWrapper != null) {
-                            val songs: Elements = songsWrapper.select("li")
-                            val tracks: MutableList<Track> = mutableListOf()
-                            songs.forEach { song: Element ->
-                                val title: String = song.select(".Information_CellTitle__2KitR").html()
-                                val artist: String = song.select(".Information_CellSubtitle__1mXGx").html()
-                                val image: String = song.select("img").attr("src")
-                                val streamUrl: String = song.select("a").attr("href")
-                                val track = Track(title, artist, image, "https://soundcloud.com$streamUrl")
-                                tracks.add(track)
-                                Log.d("SoundcloudSearch", title)
-                            }
-                            onResponse(tracks)
-                        }
-                        Handler(Looper.getMainLooper()).post {
-                            destroy()
-                        }
-                    }, "Android")
-                    loadUrl(url)
-                    visibility = View.INVISIBLE
-                    isClickable = false
-                    isFocusable = false
+            override fun onReceivedHttpError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                errorResponse: WebResourceResponse?
+            ) {
+                super.onReceivedHttpError(view, request, errorResponse)
+            }
+        }
+        addJavascriptInterface(JsInterface { value ->
+            val doc: Document = Ksoup.parse(value)
+            val songsWrapper: Element? = doc.select(".List_VerticalList__2uQYU").first()
+            if (songsWrapper != null) {
+                val songs: Elements = songsWrapper.select("li")
+                val tracks: MutableList<Track> = mutableListOf()
+                songs.forEach { song: Element ->
+                    val title: String = song.select(".Information_CellTitle__2KitR").html()
+                    val artist: String = song.select(".Information_CellSubtitle__1mXGx").html()
+                    val image: String = song.select("img").attr("src")
+                    val streamUrl: String = song.select("a").attr("href")
+                    val track = Track(title, artist, image, "https://soundcloud.com$streamUrl")
+                    tracks.add(track)
+                    Log.d("SoundcloudSearch", title)
                 }
-            })
+                onResponse(tracks)
+            }
+            Handler(Looper.getMainLooper()).post {
+                val rootView = (context as Activity).findViewById<ViewGroup>(android.R.id.content)
+                rootView.removeView(frameLayout)
+                destroy()
+            }
+        }, "Android")
+        loadUrl(url)
+        visibility = View.INVISIBLE
+        isClickable = false
+        isFocusable = false
     }
+
+    // Add the WebView to the FrameLayout
+    frameLayout.addView(webView)
+
+    // Create a root view (e.g., a LinearLayout) to attach the FrameLayout to the activity's content view
+    val rootView = (context as Activity).findViewById<ViewGroup>(android.R.id.content)
+    rootView.addView(frameLayout)
 }
 
 @Composable
