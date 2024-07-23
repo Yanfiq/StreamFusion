@@ -30,12 +30,16 @@ import com.yanfiq.streamfusion.data.viewmodel.SearchStatus
 import com.yanfiq.streamfusion.dataStore
 import com.yanfiq.streamfusion.presentation.screens.settings.PreferencesKeys
 import com.yanfiq.streamfusion.presentation.screens.player.PlayAudiusActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-fun searchAudius(query: String, limit: Int, context: Context, onResults: (List<Track>) -> Unit) {
+fun searchAudius(query: String, limit: Int, context: Context, apiStatus: ApiStatus, onResults: (List<Track>) -> Unit) {
     //audius
     if(AudiusEndpointUtil.getUsedEndpoint() != null){
         Log.d("AudiusSearch", "Start searching ${query} with ${limit} as the limit")
@@ -53,6 +57,11 @@ fun searchAudius(query: String, limit: Int, context: Context, onResults: (List<T
 
             override fun onFailure(call: Call<AudiusResponse>, t: Throwable) {
                 Log.d("AudiusSearch", "API call failed: ${t.message}")
+                apiStatus.updateAudiusApiReady(false)
+                CoroutineScope(Dispatchers.IO).launch {
+                    AudiusEndpointUtil.initialize(context, apiStatus)
+                    searchAudius(query, limit, context, apiStatus, onResults = {result -> onResults(result)})
+                }
                 onResults(emptyList())
             }
         })
