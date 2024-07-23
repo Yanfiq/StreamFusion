@@ -9,7 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
-import com.yanfiq.streamfusion.ui.theme.AppTheme
+import com.yanfiq.streamfusion.presentation.screens.BottomNavigationBar
+import com.yanfiq.streamfusion.presentation.ui.theme.AppTheme
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
@@ -20,9 +21,6 @@ class MainActivity : AppCompatActivity() {
             MainScreen(this@MainActivity)
         }
 //        SpotifyApi.initialize(this)
-
-//        val themePref = ThemeUtils.getThemePreference(this)
-//        ThemeUtils.applyTheme(themePref)
     }
 
     @Composable

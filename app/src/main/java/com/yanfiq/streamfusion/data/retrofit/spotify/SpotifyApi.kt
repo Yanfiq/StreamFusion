@@ -6,19 +6,14 @@ import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import com.google.gson.Gson
-import com.yanfiq.streamfusion.BuildConfig
 import okhttp3.*
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 
 object SpotifyApi {
-    private const val PREFS_FILENAME = "encrypted_prefs"
-    private const val TAG = "SpotifyApi"
 
     private var accessToken: String? = null
-
-    private lateinit var sharedPreferences: EncryptedSharedPreferences
 
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor { chain ->
@@ -42,42 +37,11 @@ object SpotifyApi {
 
     val service: SpotifyApiService = retrofit.create(SpotifyApiService::class.java)
 
-    fun initialize(context: Context) {
-        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-        sharedPreferences = EncryptedSharedPreferences.create(
-            PREFS_FILENAME,
-            masterKeyAlias,
-            context,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        ) as EncryptedSharedPreferences
+    fun getAccessToken(): String? {
+        return accessToken
     }
 
-    private fun ensureInitialized(context: Context) {
-        if (!this::sharedPreferences.isInitialized) {
-            initialize(context)
-        }
-    }
-
-    private fun getClientCredentials(): Pair<String?, String?> {
-        var clientId = sharedPreferences.getString("spotify_client_id", BuildConfig.SpotifyClientId)
-        var clientSecret = sharedPreferences.getString("spotify_client_secret", BuildConfig.SpotifyClientSecret)
-        if (clientId == "") clientId = BuildConfig.SpotifyClientId
-        if (clientSecret == "") clientSecret = BuildConfig.SpotifyClientSecret
-        Log.d(TAG, "Client ID: $clientId, Client Secret: $clientSecret")
-        return Pair(clientId, clientSecret)
-    }
-
-    fun fetchAccessToken(context: Context, callback: (Boolean) -> Unit) {
-        ensureInitialized(context)
-
-        val (clientId, clientSecret) = getClientCredentials()
-        if (clientId == null || clientSecret == null) {
-            Log.e(TAG, "Client ID or Client Secret is null")
-            callback(false)
-            return
-        }
-
+    fun fetchAccessToken(context: Context, clientId: String, clientSecret: String, callback: (Boolean) -> Unit) {
         val authString = "$clientId:$clientSecret"
         val encodedAuthString = Base64.encodeToString(authString.toByteArray(), Base64.NO_WRAP)
 
@@ -95,12 +59,12 @@ object SpotifyApi {
             override fun onResponse(call: Call, response: Response) {
                 response.use {
                     if (!response.isSuccessful) {
-                        Log.e(TAG, "Failed to fetch access token: ${response.message}")
+                        Log.e("SpotifyApi", "Failed to fetch access token: ${response.message}")
                         callback(false)
                         return
                     }
                     val responseBody = response.body?.string()
-                    Log.d(TAG, "Access Token Response: $responseBody")
+                    Log.d("SpotifyApi", "Access Token Response: $responseBody")
                     val accessTokenResponse = Gson().fromJson(responseBody, SpotifyAuthResponse::class.java)
                     accessToken = accessTokenResponse.access_token
                     callback(true)
@@ -108,7 +72,7 @@ object SpotifyApi {
             }
 
             override fun onFailure(call: Call, e: IOException) {
-                Log.e(TAG, "Error fetching access token", e)
+                Log.e("SpotifyApi", "Error fetching access token", e)
                 callback(false)
             }
         })

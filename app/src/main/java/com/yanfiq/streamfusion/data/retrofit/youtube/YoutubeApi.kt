@@ -1,16 +1,6 @@
 package com.yanfiq.streamfusion.data.retrofit.youtube
 
 import android.content.Context
-import android.util.Log
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
-import com.yanfiq.streamfusion.BuildConfig
-import com.yanfiq.streamfusion.dataStore
-import com.yanfiq.streamfusion.screens.PreferencesKeys
-import kotlinx.coroutines.flow.map
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.Retrofit
 import okhttp3.OkHttpClient

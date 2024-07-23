@@ -2,13 +2,10 @@ package com.yanfiq.streamfusion.data.retrofit.audius
 
 import android.content.Context
 import android.util.Log
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
-import com.yanfiq.streamfusion.data.response.audius.AudiusResponse
-import com.yanfiq.streamfusion.data.response.audius.Track
+import com.yanfiq.streamfusion.domain.model.audius.Track
 import com.yanfiq.streamfusion.data.viewmodel.ApiStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -16,9 +13,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.io.IOException
 import java.io.File
 import java.util.concurrent.TimeUnit
