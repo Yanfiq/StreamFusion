@@ -16,7 +16,10 @@
         android:theme="@style/AppTheme.NoActionBar"
         tools:targetApi="31">
         <activity
-            android:name=".screens.PlayYoutubeActivity"
+            android:name=".presentation.screens.player.PlaySpotifyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".presentation.screens.player.PlayYoutubeActivity"
             android:exported="false" />
         <activity
             android:name=".ui.settings.about.AboutDetailsActivity"
@@ -32,10 +35,10 @@
             android:name=".ui.search.soundcloud.PlaySoundcloudActivity"
             android:exported="false" />
         <activity
-            android:name=".screens.PlayAudiusActivity"
+            android:name=".presentation.screens.player.PlayAudiusActivity"
             android:exported="false" />
         <activity
-            android:name=".screens.PlaySoundcloudActivity"
+            android:name=".presentation.screens.player.PlaySoundcloudActivity"
             android:exported="false" />
         <activity
             android:name=".ui.search.youtube.PlayYoutubeActivity"
@@ -46,8 +49,17 @@
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="streamfusion.com"
+                    android:scheme="https"
+                    android:path="/callback"
+                    />
             </intent-filter>
         </activity>
     </application>

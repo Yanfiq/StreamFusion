@@ -2,7 +2,7 @@ package com.yanfiq.streamfusion.data.retrofit.audius
 
 import android.util.Log
 import com.yanfiq.streamfusion.data.response.audius.AudiusResponse
-import com.yanfiq.streamfusion.data.response.audius.Track
+import com.yanfiq.streamfusion.domain.model.audius.Track
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
