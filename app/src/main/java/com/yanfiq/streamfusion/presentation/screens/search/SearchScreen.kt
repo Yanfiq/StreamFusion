@@ -1,6 +1,7 @@
 package com.yanfiq.streamfusion.presentation.screens.search
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -47,6 +48,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -132,31 +135,31 @@ fun SearchScreen(searchResult: SearchResult, searchStatus: SearchStatus, apiStat
                                     searchQuery = searchInput
 
                                     //soundcloud
-//                                    searchStatus.updateSoundcloudSearchStatus(true)
-//                                    Log.d("SoundcloudSearch", "Starting search: ${searchQuery}")
-//                                    searchSoundcloud(
-//                                        context = context,
-//                                        query = searchQuery,
-//                                        limit = maxResult.toInt()
-//                                    ) { result ->
-//                                        searchResult.updateSoundcloudSearchData(result)
-//                                        searchStatus.updateSoundcloudSearchStatus(false)
-//                                    }
+                                    searchStatus.updateSoundcloudSearchStatus(true)
+                                    Log.d("SoundcloudSearch", "Starting search: ${searchQuery}")
+                                    searchSoundcloud(
+                                        context = context,
+                                        query = searchQuery,
+                                        limit = maxResult.toInt()
+                                    ) { result ->
+                                        searchResult.updateSoundcloudSearchData(result)
+                                        searchStatus.updateSoundcloudSearchStatus(false)
+                                    }
 
                                     //audius
-//                                    searchStatus.updateAudiusSearchStatus(true)
-//                                    if (!isAudiusReady) {
-//                                        searchStatus.setPendingSearchQuery(searchQuery)
-//                                        Log.d("AudiusSearch", "Pending search: ${searchQuery}")
-//                                    }
-//                                    // Perform the search when both conditions are met
-//                                    if (isAudiusSearching && isAudiusReady) {
-//                                        Log.d("AudiusSearch", "Starting search: ${searchQuery}")
-//                                        searchAudius(searchQuery, maxResult.toInt(), context) { result ->
-//                                            searchResult.updateAudiusSearchData(result)
-//                                            searchStatus.updateAudiusSearchStatus(false)
-//                                        }
-//                                    }
+                                    searchStatus.updateAudiusSearchStatus(true)
+                                    if (!isAudiusReady) {
+                                        searchStatus.setPendingSearchQuery(searchQuery)
+                                        Log.d("AudiusSearch", "Pending search: ${searchQuery}")
+                                    }
+                                    // Perform the search when both conditions are met
+                                    if (isAudiusSearching && isAudiusReady) {
+                                        Log.d("AudiusSearch", "Starting search: ${searchQuery}")
+                                        searchAudius(searchQuery, maxResult.toInt(), context, apiStatus) { result ->
+                                            searchResult.updateAudiusSearchData(result)
+                                            searchStatus.updateAudiusSearchStatus(false)
+                                        }
+                                    }
 
                                     //spotify
                                     searchSpotify(context, searchQuery, maxResult.toInt(), spotifyClientId, spotifyClientSecret){result ->
@@ -164,15 +167,15 @@ fun SearchScreen(searchResult: SearchResult, searchStatus: SearchStatus, apiStat
                                     }
 
                                     //youtube
-//                                    searchStatus.updateYoutubeSearchStatus(true)
-//                                    if(youtubeApiKey != ""){
-//                                        coroutineScope.launch {
-//                                            searchYouTube(context, searchQuery, maxResult.toInt(), youtubeApiKey){response ->
-//                                                searchResult.updateYoutubeSearchData(response)
-//                                                searchStatus.updateYoutubeSearchStatus(false)
-//                                            }
-//                                        }
-//                                    }
+                                    searchStatus.updateYoutubeSearchStatus(true)
+                                    if(youtubeApiKey != ""){
+                                        coroutineScope.launch {
+                                            searchYouTube(context, searchQuery, maxResult.toInt(), youtubeApiKey){response ->
+                                                searchResult.updateYoutubeSearchData(response)
+                                                searchStatus.updateYoutubeSearchStatus(false)
+                                            }
+                                        }
+                                    }
                                 }
                             ) {
                                 Icon(imageVector = Icons.Filled.Search, contentDescription = "Search Icon")
@@ -211,8 +214,13 @@ fun SearchTabLayout(searchResult: SearchResult, searchStatus: SearchStatus, apiS
                         }
                         },
                     text = {
+                        val dataStore: DataStore<Preferences> = LocalContext.current.dataStore
+                        val isDark by (dataStore.data.map { preferences ->
+                            preferences[PreferencesKeys.DARK_MODE] ?: false
+                        }).collectAsState(initial = isSystemInDarkTheme())
+
                         when (i){
-                            0 -> Icon(painter = painterResource(id = R.drawable.audiuslogo), modifier = Modifier.height(25.dp), contentDescription = "Audius logo", tint = if (!isSystemInDarkTheme()) Color.Unspecified else MaterialTheme.colorScheme.onSurface)
+                            0 -> Icon(painter = painterResource(id = R.drawable.audiuslogo), modifier = Modifier.height(25.dp), contentDescription = "Audius logo", tint = if (!isDark) Color.Unspecified else MaterialTheme.colorScheme.onSurface)
                             1 -> Icon(painter = painterResource(id = R.drawable.soundcloudlogo), modifier = Modifier.height(25.dp), contentDescription = "SoundCloud logo", tint = MaterialTheme.colorScheme.onSurface)
                             2 -> Icon(painter = painterResource(id = R.drawable.spotifylogo), modifier = Modifier.height(25.dp), contentDescription = "Spotify logo", tint = Color.Unspecified)
                             3 -> Row {

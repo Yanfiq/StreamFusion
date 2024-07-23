@@ -30,5 +30,6 @@ data class BottomNavigationItem(
                 icon = Icons.Filled.Settings,
                 route = Screens.Settings.route
             ),
-        )    }
+        )
+    }
 }

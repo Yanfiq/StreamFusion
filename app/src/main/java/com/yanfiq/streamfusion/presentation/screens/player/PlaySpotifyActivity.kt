@@ -16,24 +16,24 @@ class PlaySpotifyActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_play_spotify)
-        webView = findViewById(R.id.spotify_play_webview)
-        webView.settings.javaScriptEnabled = true
-        Log.d("SpotifyPlay", authUrl)
-        webView.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView?, url: String?) {
-                super.onPageFinished(view, url)
-                Log.d("SpotifyPlay", "URL = ${url}")
-                initializeSpotifyPlayer(SpotifyApi.getAccessToken()!!)
-                // Handle token extraction here
-//                if (url != null && url.startsWith(redirectUri)) {
-//                    val token = url.split("access_token=")[1].split("&")[0]
-//                    Log.d("SpotifyPlay", "Access Token=${token}")
-//                    initializeSpotifyPlayer(token)
-//                }
-            }
-        }
-        webView.loadUrl(authUrl)
+//        setContentView(R.layout.activity_play_spotify)
+//        webView = findViewById(R.id.spotify_play_webview)
+//        webView.settings.javaScriptEnabled = true
+//        Log.d("SpotifyPlay", authUrl)
+//        webView.webViewClient = object : WebViewClient() {
+//            override fun onPageFinished(view: WebView?, url: String?) {
+//                super.onPageFinished(view, url)
+//                Log.d("SpotifyPlay", "URL = ${url}")
+//                initializeSpotifyPlayer(SpotifyApi.getAccessToken()!!)
+//                // Handle token extraction here
+////                if (url != null && url.startsWith(redirectUri)) {
+////                    val token = url.split("access_token=")[1].split("&")[0]
+////                    Log.d("SpotifyPlay", "Access Token=${token}")
+////                    initializeSpotifyPlayer(token)
+////                }
+//            }
+//        }
+//        webView.loadUrl(authUrl)
     }
 
     private fun initializeSpotifyPlayer(token: String) {

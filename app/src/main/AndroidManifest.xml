@@ -22,26 +22,10 @@
             android:name=".presentation.screens.player.PlayYoutubeActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.settings.about.AboutDetailsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.settings.about.AboutActivity"
-            android:exported="false"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.search.spotify.PlaySpotifyActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.search.soundcloud.PlaySoundcloudActivity"
-            android:exported="false" />
-        <activity
             android:name=".presentation.screens.player.PlayAudiusActivity"
             android:exported="false" />
         <activity
             android:name=".presentation.screens.player.PlaySoundcloudActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.search.youtube.PlayYoutubeActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

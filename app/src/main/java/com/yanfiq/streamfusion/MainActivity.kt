@@ -20,7 +20,6 @@ class MainActivity : AppCompatActivity() {
         setContent{
             MainScreen(this@MainActivity)
         }
-//        SpotifyApi.initialize(this)
     }
 
     @Composable

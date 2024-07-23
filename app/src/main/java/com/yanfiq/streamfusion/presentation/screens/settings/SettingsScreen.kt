@@ -34,8 +34,6 @@ import kotlinx.coroutines.flow.map
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(dataStore: DataStore<Preferences> = LocalContext.current.dataStore) {
-    val scope = rememberCoroutineScope()
-
     val isDark by (dataStore.data.map { preferences ->
         preferences[PreferencesKeys.DARK_MODE] ?: false
     }).collectAsState(initial = false)

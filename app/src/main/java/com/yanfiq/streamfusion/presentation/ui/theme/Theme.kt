@@ -8,8 +8,15 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import com.yanfiq.streamfusion.dataStore
+import com.yanfiq.streamfusion.presentation.screens.settings.PreferencesKeys
+import kotlinx.coroutines.flow.map
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -258,13 +265,18 @@ fun AppTheme(
     dynamicColor: Boolean = true,
     content: @Composable() () -> Unit
 ) {
-  val colorScheme = when {
+    val dataStore: DataStore<Preferences> = LocalContext.current.dataStore
+    val isDark by (dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.DARK_MODE] ?: false
+    }).collectAsState(initial = darkTheme)
+
+    val colorScheme = when {
       dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
           val context = LocalContext.current
-          if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+          if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
       }
-      
-      darkTheme -> darkScheme
+
+      isDark -> darkScheme
       else -> lightScheme
   }
 

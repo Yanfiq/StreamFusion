@@ -20,6 +20,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.yanfiq.streamfusion.data.retrofit.audius.AudiusEndpointUtil
 import com.yanfiq.streamfusion.data.viewmodel.ApiStatus
 import com.yanfiq.streamfusion.data.viewmodel.SearchResult
 import com.yanfiq.streamfusion.data.viewmodel.SearchStatus
@@ -29,7 +30,6 @@ import com.yanfiq.streamfusion.presentation.screens.settings.SettingsScreen
 
 @Composable
 fun BottomNavigationBar(context: Context) {
-//initializing the default selected item
     var navigationSelectedItem by remember {
         mutableStateOf(0)
     }
@@ -44,10 +44,10 @@ fun BottomNavigationBar(context: Context) {
     val apiStatus: ApiStatus = viewModel()
 
     LaunchedEffect(Unit) {
-//        AudiusEndpointUtil.initialize(context, apiStatus)
+        AudiusEndpointUtil.initialize(context, apiStatus)
     }
 
-//scaffold to hold our bottom navigation Bar
+    //scaffold to hold our bottom navigation Bar
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
@@ -95,7 +95,8 @@ fun BottomNavigationBar(context: Context) {
         NavHost(
             navController = navController,
             startDestination = Screens.Home.route,
-            modifier = Modifier.padding(paddingValues = paddingValues)) {
+            modifier = Modifier.padding(paddingValues = paddingValues)
+        ) {
             composable(Screens.Home.route) {
                 HomeScreen(
                     navController = navController
