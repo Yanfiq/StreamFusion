@@ -85,9 +85,10 @@ fun searchSoundcloud(
                             let interval = setInterval(
                                 function (){
                                     let list = document.querySelector('.List_VerticalList__2uQYU');
+                                    let showingAllItem = document.querySelector('.LazyLoadingList_InlineLoadingMessage__2DOT2');
                                     result_acquired = list.getElementsByTagName('li').length;
-                                    console.log(result_acquired);
-                                    if(result_acquired >= result_desired){
+                                    console.log(result_acquired+' | '+showingAllItem.innerText);
+                                    if(result_acquired >= result_desired || showingAllItem.innerText.includes('Showing all tracks')){
                                         Android.returnPage(document.documentElement.outerHTML);
                                         clearInterval(interval);
                                     }

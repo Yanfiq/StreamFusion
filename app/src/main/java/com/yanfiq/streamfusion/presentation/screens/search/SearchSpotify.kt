@@ -2,6 +2,7 @@ package com.yanfiq.streamfusion.presentation.screens.search
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
+import androidx.core.graphics.toColor
+import com.yanfiq.streamfusion.R
 import com.yanfiq.streamfusion.data.response.spotify.SpotifyResponse
 import com.yanfiq.streamfusion.domain.model.spotify.Track
 import com.yanfiq.streamfusion.data.retrofit.spotify.SpotifyApi
@@ -89,7 +92,8 @@ fun SpotifySearchResult(searchResult: SearchResult, searchStatus: SearchStatus, 
             modifier = Modifier.fillMaxSize()
         ) {
             items(searchResults_spotify) { item ->
-                ListItem(item.name, item.artists[0].name, item.album.images[0].url) {
+                val artists = item.artists.joinToString { it.name }
+                ListItem(item.name, artists, item.album.images[0].url) {
                     val explicitIntent = Intent(Intent.ACTION_VIEW, Uri.parse("spotify:track:${item.id}:play"))
                     startActivity(context, explicitIntent, null)
                 }

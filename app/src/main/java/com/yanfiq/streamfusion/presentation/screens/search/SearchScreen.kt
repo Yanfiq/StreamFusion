@@ -61,6 +61,8 @@ import com.yanfiq.streamfusion.data.viewmodel.SearchStatus
 import com.yanfiq.streamfusion.dataStore
 import com.yanfiq.streamfusion.presentation.screens.settings.PreferencesKeys
 import com.yanfiq.streamfusion.presentation.ui.theme.AppTheme
+import com.yanfiq.streamfusion.utils.getHiddenMessage
+import com.yanfiq.streamfusion.utils.loadImageFromDrawable
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -83,16 +85,27 @@ fun SearchScreen(searchResult: SearchResult, searchStatus: SearchStatus, apiStat
     }).collectAsState(initial = 10f)
 
     val youtubeApiKey by (LocalContext.current.dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.YOUTUBE_API_KEY] ?: ""
+        preferences[PreferencesKeys.YOUTUBE_API_KEY] ?: getHiddenMessage(loadImageFromDrawable(context, R.drawable.youtubelogo_text_nodpi))
     }).collectAsState(initial = "")
 
+    val spotifyHidden = getHiddenMessage(loadImageFromDrawable(context, R.drawable.spotifylogo_nodpi))
+
     val spotifyClientId by (LocalContext.current.dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.SPOTIFY_CLIENT_ID] ?: ""
+        preferences[PreferencesKeys.SPOTIFY_CLIENT_ID] ?: spotifyHidden.substring(0, spotifyHidden.indexOf('|'))
     }).collectAsState(initial = "")
 
     val spotifyClientSecret by (LocalContext.current.dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.SPOTIFY_CLIENT_SECRET] ?: ""
+        preferences[PreferencesKeys.SPOTIFY_CLIENT_SECRET] ?: spotifyHidden.substring(spotifyHidden.indexOf('|')+1)
     }).collectAsState(initial = "")
+
+    // Perform the search when both conditions are met
+    if (isAudiusSearching && isAudiusReady) {
+        Log.d("AudiusSearch", "Starting search: ${searchQuery}")
+        searchAudius(searchQuery, maxResult.toInt(), context, apiStatus) { result ->
+            searchResult.updateAudiusSearchData(result)
+            searchStatus.updateAudiusSearchStatus(false)
+        }
+    }
 
     AppTheme {
         Scaffold (
@@ -146,19 +159,12 @@ fun SearchScreen(searchResult: SearchResult, searchStatus: SearchStatus, apiStat
                                         searchStatus.updateSoundcloudSearchStatus(false)
                                     }
 
+                                    Log.d("Audius search", if(isAudiusReady) "Ready" else "Not ready")
                                     //audius
                                     searchStatus.updateAudiusSearchStatus(true)
                                     if (!isAudiusReady) {
                                         searchStatus.setPendingSearchQuery(searchQuery)
                                         Log.d("AudiusSearch", "Pending search: ${searchQuery}")
-                                    }
-                                    // Perform the search when both conditions are met
-                                    if (isAudiusSearching && isAudiusReady) {
-                                        Log.d("AudiusSearch", "Starting search: ${searchQuery}")
-                                        searchAudius(searchQuery, maxResult.toInt(), context, apiStatus) { result ->
-                                            searchResult.updateAudiusSearchData(result)
-                                            searchStatus.updateAudiusSearchStatus(false)
-                                        }
                                     }
 
                                     //spotify
