@@ -15,11 +15,13 @@ class YoutubeRemoteDataSource: YoutubeRepository {
         limit: Int,
         context: Context,
         apiKey: String,
+        onProgress: (String) -> Unit,
         onResults: (List<Track>) -> Unit
     ) {
         coroutineScope {
             try {
                 Log.d("youtubeSearch", "Starting search $limit $query using $apiKey")
+                onProgress("Start search with keyword \'${query}\'")
                 val youTubeApiService = YouTubeApi.getApiInstance(context, apiKey)
                 val searchResponse = youTubeApiService.searchVideos("snippet", query, "video", limit)
                 if (searchResponse.isSuccessful) {

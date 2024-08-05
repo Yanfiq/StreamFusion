@@ -20,9 +20,11 @@ class SpotifyRemoteDataSource: SpotifyRepository {
         context: Context,
         clientId: String,
         clientSecret: String,
+        onProgress: (String) -> Unit,
         onResults: (List<Track>) -> Unit
     ) {
         Log.d("spotifySearch", "Starting search $limit $query using $clientId and $clientSecret")
+        onProgress("Start search with keyword \'${query}\'")
         SpotifyApi.service.searchTracks(query, "track", limit).enqueue(object :
             Callback<SpotifyResponse> {
             override fun onResponse(
@@ -33,12 +35,18 @@ class SpotifyRemoteDataSource: SpotifyRepository {
                     val tracks = response.body()?.tracks?.items ?: emptyList()
                     onResults(tracks.map { Track(it.id, it.name, it.artists.joinToString { it.name }, it.duration_ms/1000, it.album.images[0].url) })
                 } else {
+                    onProgress("Re-fetch access token")
                     SpotifyApi.fetchAccessToken(context, clientId, clientSecret) { success ->
                         if (success) {
                             CoroutineScope(Dispatchers.IO).launch {
-                                search(query, limit, context, clientId, clientSecret) { response ->
-                                    onResults(response)
-                                }
+                                search(query, limit, context, clientId, clientSecret,
+                                    onProgress = {message ->
+                                        onProgress(message)
+                                    },
+                                    onResults = {results ->
+                                        onResults(results)
+                                    }
+                                )
                             }
                         }else{
                             onResults(emptyList())

@@ -15,9 +15,18 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class AudiusRemoteDataSource: AudiusRepository {
-    override suspend fun search(query: String, limit: Int, context: Context, apiStatus: ApiStatus, onResults: (List<Track>) -> Unit) {
+    override suspend fun search(
+        query: String,
+        limit: Int,
+        context: Context,
+        apiStatus: ApiStatus,
+        retryCount: Int,
+        onProgress: (message: String) -> Unit,
+        onResults: (List<Track>) -> Unit
+    ) {
         if(AudiusEndpointUtil.getUsedEndpoint() != null){
-            Log.d("AudiusSearch", "Start searching ${query} with ${limit} as the limit")
+            Log.d("AudiusSearch", "Start searching ${limit} ${query}")
+            onProgress("Start search with keyword \'${query}\'")
             val api = AudiusEndpointUtil.getApiInstance()
             api?.searchTracks(query, limit)?.enqueue(object : Callback<AudiusResponse> {
                 override fun onResponse(call: Call<AudiusResponse>, response: Response<AudiusResponse>) {
@@ -26,20 +35,41 @@ class AudiusRemoteDataSource: AudiusRepository {
                         onResults(tracks.map { Track(it.id, it.title, it.user.name, it.duration, it.artwork.medium) })
                     } else {
                         Log.d("AudiusSearch", "Response not successful: ${response.errorBody()?.string()}")
+                        onProgress("Response not successful: ${response.errorBody()?.string()}")
                         onResults(emptyList())
                     }
                 }
 
                 override fun onFailure(call: Call<AudiusResponse>, t: Throwable) {
                     Log.d("AudiusSearch", "API call failed: ${t.message}")
-                    apiStatus.updateAudiusApiReady(false)
-                    CoroutineScope(Dispatchers.IO).launch {
-                        AudiusEndpointUtil.initialize(context, apiStatus)
-                        search(query, limit, context, apiStatus, onResults = {results -> onResults(results)})
+                    onProgress("API call failed: ${t.message}")
+                    if(retryCount < 3){
+                        apiStatus.updateAudiusApiReady(false)
+                        CoroutineScope(Dispatchers.IO).launch {
+                            onProgress("Re-fetching endpoints")
+                            AudiusEndpointUtil.initialize(context, apiStatus)
+                            onProgress("Trying again using ${AudiusEndpointUtil.getUsedEndpoint().toString()}")
+                            search(query, limit, context, apiStatus, retryCount+1, onProgress = {message-> onProgress(message) }, onResults = {results -> onResults(results)})
+                        }
+                    }else{
+                        onResults(emptyList())
                     }
-                    onResults(emptyList())
                 }
             })
+        }else{
+            apiStatus.updateAudiusApiReady(false)
+            onProgress("API call failed")
+            if(retryCount < 3){
+                apiStatus.updateAudiusApiReady(false)
+                CoroutineScope(Dispatchers.IO).launch {
+                    onProgress("Re-fetching endpoints")
+                    AudiusEndpointUtil.initialize(context, apiStatus)
+                    onProgress("Trying again using ${AudiusEndpointUtil.getUsedEndpoint().toString()}")
+                    search(query, limit, context, apiStatus, retryCount+1, onProgress = {message-> onProgress(message) }, onResults = {results -> onResults(results)})
+                }
+            }else{
+                onResults(emptyList())
+            }
         }
     }
 }

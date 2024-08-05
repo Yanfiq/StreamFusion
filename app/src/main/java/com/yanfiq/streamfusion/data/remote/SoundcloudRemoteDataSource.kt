@@ -22,10 +22,17 @@ import com.fleeksoft.ksoup.select.Elements
 import com.yanfiq.streamfusion.data.repositories.SoundcloudRepository
 import com.yanfiq.streamfusion.domain.model.Track
 
-class JsInterface(private val onResult: (String) -> Unit) {
+class JsInterface1(private val onResult: (String) -> Unit) {
     @JavascriptInterface
     fun returnPage(value: String) {
         onResult(value)
+    }
+}
+
+class JsInterface2(private val onProgress: (String) -> Unit){
+    @JavascriptInterface
+    fun returnMessage(value: String){
+        onProgress(value)
     }
 }
 
@@ -34,8 +41,10 @@ class SoundcloudRemoteDataSource: SoundcloudRepository {
         query: String,
         limit: Int,
         context: Context,
+        onProgress: (String) -> Unit,
         onResults: (List<Track>) -> Unit
     ) {
+        onProgress("Start search with keyword \'${query}\'")
         val url = "https://m.soundcloud.com/search/sounds?q=${query.replace(" ", "%20")}"
 
         // Create a FrameLayout to hold the WebView
@@ -62,9 +71,10 @@ class SoundcloudRemoteDataSource: SoundcloudRepository {
                                     let list = document.querySelector('.List_VerticalList__2uQYU');
                                     let showingAllItem = document.querySelector('.LazyLoadingList_InlineLoadingMessage__2DOT2');
                                     result_acquired = list.getElementsByTagName('li').length;
+                                    Android2.returnMessage(`Getting results ${'$'}{result_acquired}/${limit}`)
                                     console.log(result_acquired+' | '+showingAllItem.innerText);
                                     if(result_acquired >= result_desired || showingAllItem.innerText.includes('Showing all tracks')){
-                                        Android.returnPage(document.documentElement.outerHTML);
+                                        Android1.returnPage(document.documentElement.outerHTML);
                                         clearInterval(interval);
                                     }
                                     window.scrollTo(0, document.body.scrollHeight); 
@@ -92,7 +102,7 @@ class SoundcloudRemoteDataSource: SoundcloudRepository {
                     super.onReceivedHttpError(view, request, errorResponse)
                 }
             }
-            addJavascriptInterface(JsInterface { value ->
+            addJavascriptInterface(JsInterface1 { value ->
                 Log.d("SoundcloudSearch", "Javascript interface called")
                 (context as Activity).runOnUiThread {
                     val doc: Document = Ksoup.parse(value)
@@ -121,7 +131,10 @@ class SoundcloudRemoteDataSource: SoundcloudRepository {
                         }
                     }
                 }
-            }, "Android")
+            }, "Android1")
+            addJavascriptInterface(JsInterface2 { value ->
+                onProgress(value)
+            }, "Android2")
             loadUrl(url)
             visibility = View.INVISIBLE
             isClickable = false

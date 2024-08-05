@@ -1,5 +1,7 @@
 package com.yanfiq.streamfusion.presentation.screens.search
 
+import android.health.connect.datatypes.units.Length
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -220,7 +222,7 @@ fun SearchResultScreen(isLoading: Boolean, message: String, result: List<Track>,
                     color = MaterialTheme.colorScheme.secondary,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,
                 )
-                Text(text = message)
+                Text(text = message, style = MaterialTheme.typography.bodyLarge)
             }
         }else{
             LazyColumn(
@@ -266,6 +268,7 @@ fun ListItem(title: String, artist: String, durationInSeconds: Int, thumbnail_ur
 @Preview(showBackground = true)
 @Composable
 fun SearchScreenPreview_loaded() {
+    val context = LocalContext.current
     val navController = rememberNavController()
     val tracks = listOf(
         Track("", "Test1", "Test1", 63, ""),
@@ -283,10 +286,10 @@ fun SearchScreenPreview_loaded() {
         youtubeSearchData = youtubeSearchData,
         navController = navController,
         onSearchClick = { query ->
-
+            Toast.makeText(context, "searching $query", Toast.LENGTH_SHORT).show()
         },
         onPlayClick = {track, platform ->
-
+            Toast.makeText(context, "Playing ${track.tractTitle}", Toast.LENGTH_SHORT).show()
         }
     )
 }

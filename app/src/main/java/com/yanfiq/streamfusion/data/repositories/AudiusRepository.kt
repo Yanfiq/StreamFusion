@@ -5,5 +5,12 @@ import com.yanfiq.streamfusion.domain.model.Track
 import com.yanfiq.streamfusion.presentation.viewmodels.ApiStatus
 
 interface AudiusRepository {
-    suspend fun search(query: String, limit: Int, context: Context, apiStatus: ApiStatus, onResults: (List<Track>) -> Unit)
+    suspend fun search(query: String,
+                       limit: Int,
+                       context: Context,
+                       apiStatus: ApiStatus,
+                       retryCount: Int,
+                       onProgress: (message: String) -> Unit,
+                       onResults: (List<Track>) -> Unit
+    )
 }
