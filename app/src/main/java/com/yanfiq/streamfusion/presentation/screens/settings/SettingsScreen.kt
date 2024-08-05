@@ -30,6 +30,7 @@ import com.jamal.composeprefs3.ui.prefs.SwitchPref
 import com.yanfiq.streamfusion.dataStore
 import com.yanfiq.streamfusion.presentation.ui.theme.AppTheme
 import kotlinx.coroutines.flow.map
+import com.yanfiq.streamfusion.utils.*
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -99,7 +100,7 @@ fun SettingsScreen(dataStore: DataStore<Preferences> = LocalContext.current.data
                                     title = "YouTube API key",
                                     dialogTitle = "Youtube API key",
                                     dialogMessage = "Enter your API key",
-                                    summary = youtubeApiKey
+                                    summary = youtubeApiKey.mask(maxSize = 30)
                                 )
                             }
                             prefsItem {
@@ -108,7 +109,7 @@ fun SettingsScreen(dataStore: DataStore<Preferences> = LocalContext.current.data
                                     title = "Spotify client ID",
                                     dialogTitle = "Spotify client ID",
                                     dialogMessage = "Enter your client ID",
-                                    summary = spotifyClientId
+                                    summary = spotifyClientId.mask(maxSize = 30)
                                 )
                             }
                             prefsItem {
@@ -117,7 +118,7 @@ fun SettingsScreen(dataStore: DataStore<Preferences> = LocalContext.current.data
                                     title = "Spotify client secret",
                                     dialogTitle = "Spotify client secret",
                                     dialogMessage = "Enter your client secret",
-                                    summary = spotifyClientSecret
+                                    summary = spotifyClientSecret.mask(maxSize = 30)
                                 )
                             }
                         }

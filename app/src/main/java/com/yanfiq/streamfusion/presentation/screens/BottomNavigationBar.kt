@@ -1,6 +1,5 @@
 package com.yanfiq.streamfusion.presentation.screens
 
-import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -9,27 +8,24 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.yanfiq.streamfusion.data.retrofit.audius.AudiusEndpointUtil
-import com.yanfiq.streamfusion.data.viewmodel.ApiStatus
-import com.yanfiq.streamfusion.data.viewmodel.SearchResult
-import com.yanfiq.streamfusion.data.viewmodel.SearchStatus
+import com.yanfiq.streamfusion.domain.model.Track
 import com.yanfiq.streamfusion.presentation.screens.home.HomeScreen
 import com.yanfiq.streamfusion.presentation.screens.search.SearchScreen
+import com.yanfiq.streamfusion.presentation.screens.search.SearchScreenData
+import com.yanfiq.streamfusion.presentation.screens.search.StreamingPlatform
 import com.yanfiq.streamfusion.presentation.screens.settings.SettingsScreen
 
 @Composable
-fun BottomNavigationBar(context: Context) {
+fun BottomNavigationBar(searchScreenData: SearchScreenData, onSearchClick: (searchQuery: String) -> Unit, onPlayClick: (Track, StreamingPlatform) -> Unit) {
     var navigationSelectedItem by remember {
         mutableStateOf(0)
     }
@@ -38,14 +34,6 @@ fun BottomNavigationBar(context: Context) {
      * we can get the instance of the navController
      */
     val navController = rememberNavController()
-
-    val searchStatus: SearchStatus = viewModel()
-    val searchResult: SearchResult = viewModel()
-    val apiStatus: ApiStatus = viewModel()
-
-    LaunchedEffect(Unit) {
-        AudiusEndpointUtil.initialize(context, apiStatus)
-    }
 
     //scaffold to hold our bottom navigation Bar
     Scaffold(
@@ -104,10 +92,13 @@ fun BottomNavigationBar(context: Context) {
             }
             composable(Screens.Search.route) {
                 SearchScreen(
-                    apiStatus = apiStatus,
-                    searchResult = searchResult,
-                    searchStatus = searchStatus,
-                    navController = navController
+                    audiusSearchData = searchScreenData.audiusSearchData,
+                    soundcloudsearchData = searchScreenData.soundcloudSearchData,
+                    spotifySearchData = searchScreenData.spotifySearchData,
+                    youtubeSearchData = searchScreenData.youtubeSearchData,
+                    navController = navController,
+                    onSearchClick = {searchQuery -> onSearchClick(searchQuery) },
+                    onPlayClick = {track, platform -> onPlayClick(track, platform) }
                 )
             }
             composable(Screens.Settings.route) {

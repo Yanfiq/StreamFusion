@@ -6,7 +6,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
 import com.yanfiq.streamfusion.domain.model.audius.Track
-import com.yanfiq.streamfusion.data.viewmodel.ApiStatus
+import com.yanfiq.streamfusion.presentation.viewmodels.ApiStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll

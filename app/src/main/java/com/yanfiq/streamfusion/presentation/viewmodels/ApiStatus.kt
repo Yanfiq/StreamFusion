@@ -1,4 +1,4 @@
-package com.yanfiq.streamfusion.data.viewmodel
+package com.yanfiq.streamfusion.presentation.viewmodels
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

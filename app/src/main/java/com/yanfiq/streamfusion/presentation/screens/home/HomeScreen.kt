@@ -15,10 +15,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 //import com.yanfiq.streamfusion.ui.theme.NavigationBarMediumTheme
 import com.yanfiq.streamfusion.presentation.ui.theme.AppTheme
 
@@ -52,11 +50,8 @@ fun HomeScreen(navController: NavController) {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Text(
-                            text = "Home Screen",
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(vertical = 20.dp)
-                        )
+                        Text(text = "Trending Page")
+//                        AudiusTrends(audiusTrends = audiusTrendsSongs)
                     }
                 }
             }
@@ -64,8 +59,11 @@ fun HomeScreen(navController: NavController) {
     }
 }
 
-@Preview
-@Composable
-private fun homePreview(){
-    HomeScreen(navController = rememberNavController())
-}
+//@Preview
+//@Composable
+//private fun homePreview(
+//
+//){
+//    var audiusTrends: List<com.yanfiq.streamfusion.domain.model.audius.Track> = mutableListOf(Track("", Artwork("", "", ""), "", Artist("")))
+//    HomeScreen(navController = rememberNavController(), )
+//}

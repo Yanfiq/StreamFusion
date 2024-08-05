@@ -16,7 +16,7 @@ fun getHiddenMessage(bitmap: Bitmap?): String {
         // Get image width and height
         val width = bitmap.width
         val height = bitmap.height
-        Log.d("SteganographyTest", "Image size = (${width}x${height})")
+        Log.d("Steganography", "Image size = (${width}x${height})")
 
         // Extract the binary data
         var printLength = false
@@ -30,14 +30,14 @@ fun getHiddenMessage(bitmap: Bitmap?): String {
 
                 if (a == 0x01) {
                     if(binarySecret.length <= 24){
-                        Log.d("SteganographyTest", "Pixel value at ${x}x${y}: ($a, $r, $g, $b)|rgb value: ${bitmap.getPixel(x, y)}")
+                        Log.d("Steganography", "Pixel value at ${x}x${y}: ($a, $r, $g, $b)|rgb value: ${bitmap.getPixel(x, y)}")
                     }
                     binarySecret.append((r shr 7) and 1)
                     binarySecret.append((g shr 7) and 1)
                     binarySecret.append((b shr 7) and 1)
                 }
                 if(binarySecret.length >= 32 && !printLength){
-                    Log.d("SteganographyTest", "Length binary: ${binarySecret.substring(0, 32)}")
+                    Log.d("Steganography", "Length binary: ${binarySecret.substring(0, 32)}")
                     printLength = true
                 }
             }
@@ -51,7 +51,7 @@ fun getHiddenMessage(bitmap: Bitmap?): String {
         val messageBinary = binarySecret.substring(32, 32 + secretLength * 8)
         val secretMessage = binaryToText(messageBinary)
 
-        Log.d("SteganographyTest", "Secret message: ${secretMessage}")
+        Log.d("Steganography", "Secret message: ${secretMessage}")
 
         return secretMessage
     }

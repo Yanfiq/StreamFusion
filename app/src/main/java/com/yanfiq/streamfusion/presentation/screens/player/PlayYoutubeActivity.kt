@@ -37,6 +37,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFram
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.YouTubePlayerTracker
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import com.yanfiq.streamfusion.presentation.ui.theme.AppTheme
+import com.yanfiq.streamfusion.utils.ISODurationToSeconds
 import kotlinx.coroutines.delay
 import java.util.regex.Pattern
 
@@ -49,7 +50,7 @@ class PlayYoutubeActivity : AppCompatActivity() {
                 Title = intent.getStringExtra("VIDEO_TITLE") ?: "NULL",
                 Channel = intent.getStringExtra("VIDEO_CREATOR") ?: "NULL",
                 videoID = intent.getStringExtra("VIDEO_ID") ?: "NULL",
-                maxDuration = parseISODurationToSeconds(intent.getStringExtra("VIDEO_DURATION") ?: "0S")
+                maxDuration = ISODurationToSeconds(intent.getStringExtra("VIDEO_DURATION") ?: "0S")
             )
         }
     }
@@ -156,23 +157,6 @@ fun Player(videoID: String, player: (YouTubePlayer) -> Unit, tracker: (YouTubePl
             .fillMaxWidth()
             .wrapContentHeight()
     )
-}
-
-fun parseISODurationToSeconds(duration: String): Int {
-    val pattern = Pattern.compile("PT(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+)S)?")
-    val matcher = pattern.matcher(duration)
-
-    var totalSeconds = 0
-
-    if (matcher.matches()) {
-        val hours = matcher.group(1)?.toIntOrNull() ?: 0
-        val minutes = matcher.group(2)?.toIntOrNull() ?: 0
-        val seconds = matcher.group(3)?.toIntOrNull() ?: 0
-
-        totalSeconds = hours * 3600 + minutes * 60 + seconds
-    }
-
-    return totalSeconds
 }
 
 @Preview

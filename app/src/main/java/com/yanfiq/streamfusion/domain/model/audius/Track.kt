@@ -4,5 +4,6 @@ data class Track(
     val id: String,
     val artwork: Artwork,
     val title: String,
-    val user: Artist
+    val user: Artist,
+    val duration: Int
 )
