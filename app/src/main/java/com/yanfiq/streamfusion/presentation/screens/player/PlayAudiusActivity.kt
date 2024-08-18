@@ -55,11 +55,19 @@ class PlayAudiusActivity : AppCompatActivity() {
         val trackid = intent.getStringExtra("TRACK_ID") ?: "null"
         val trackTitle = intent.getStringExtra("TRACK_TITLE") ?: "null"
         val trackArtist = intent.getStringExtra("TRACK_ARTIST") ?: "null"
+        val trackDuration = intent.getIntExtra("TRACK_DURATION", 0)
         val trackArtwork = intent.getStringExtra("TRACK_ARTWORK") ?: "null"
         Log.d("AudiusStream", "Track ID: "+trackid)
 
         setContent {
-            AudiusPlayScreen(trackId = trackid, trackTitle = trackTitle, trackArtist = trackArtist, trackArtwork = trackArtwork, context = this@PlayAudiusActivity)
+            AudiusPlayScreen(
+                trackId = trackid,
+                trackTitle = trackTitle,
+                trackArtist = trackArtist,
+                trackArtwork = trackArtwork,
+                trackDuration = trackDuration,
+                context = this@PlayAudiusActivity
+            )
         }
     }
 }
@@ -71,17 +79,16 @@ fun AudiusPlayScreen(
     trackTitle: String,
     trackArtist: String,
     trackArtwork: String,
+    trackDuration: Int,
     context: Context
 ) {
     var isPaused by remember { mutableStateOf(true) }
     val mediaPlayer = remember { MediaPlayer() }
     var sliderPosition by remember { mutableStateOf(0f) }
-    var maxDuration by remember { mutableStateOf(1f) }
     var isPlayerReady by remember { mutableStateOf(false) }
 
     LaunchedEffect(trackId) {
         playTrack(trackId, mediaPlayer, context){ result ->
-            maxDuration = result
             isPlayerReady = true
         }
         while (true) {
@@ -98,48 +105,28 @@ fun AudiusPlayScreen(
         }
     }
 
-    AppTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = trackTitle, style = MaterialTheme.typography.titleLarge)
-                Text(text = trackArtist, style = MaterialTheme.typography.titleMedium)
-                AsyncImage(
-                    model = trackArtwork,
-                    contentDescription = trackTitle,
-                    imageLoader = ImageLoader(context),
-                    modifier = Modifier.width(400.dp)
-                        .height(400.dp)
-                )
-                Slider(value = sliderPosition,
-                    onValueChange = { newValue ->
-                        sliderPosition = newValue
-                        mediaPlayer.seekTo((newValue * 1000).toInt())
-                    },
-                    valueRange = 0f..maxDuration,
-                    enabled = isPlayerReady,
-                    modifier = Modifier.fillMaxWidth()) // Slider functionality
-                Button(
-                    onClick = {
-                        isPaused = !isPaused
-                        if (isPaused) mediaPlayer.pause() else mediaPlayer.start()
-                    },
-                    enabled = isPlayerReady,
-                    modifier = Modifier.width(75.dp)
-                        .height(75.dp),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Icon(
-                        imageVector = if (isPaused) Icons.Filled.PlayArrow else Icons.Filled.Pause,
-                        contentDescription = "Play/Pause button",
-                        modifier = Modifier.fillMaxSize(0.60f)
-                    )
-                }
-            }
+    PlayScreen(
+        context = context,
+        trackTitle = trackTitle,
+        trackArtist = trackArtist,
+        trackArtwork = trackArtwork,
+        trackDuration = trackDuration,
+        trackElapsedTime = sliderPosition.toInt(),
+        isPlayerReady = isPlayerReady,
+        isPlaying = !isPaused,
+        onPause = {
+            isPaused = true
+            mediaPlayer.pause()
+                  },
+        onPlay = {
+            isPaused = false
+            mediaPlayer.start()
+                 },
+        onSeek = { newValue ->
+            sliderPosition = newValue.toFloat()
+            mediaPlayer.seekTo(newValue * 1000)
         }
-    }
+    )
 }
 
 private fun playTrack(trackId: String, mediaPlayer: MediaPlayer, context: Context, onResult: (Float) -> Unit) {
@@ -193,5 +180,5 @@ private fun playTrack(trackId: String, mediaPlayer: MediaPlayer, context: Contex
 @Preview
 private fun Preview(){
     val context: Context = LocalContext.current
-    AudiusPlayScreen(trackId = "75746", trackTitle = "Acumalaka", trackArtist = "Acumalaka", trackArtwork = "https://i1.sndcdn.com/artworks-000057356357-9tmqex-t240x240.jpg", context = context)
+    AudiusPlayScreen(trackId = "75746", trackTitle = "Acumalaka", trackArtist = "Acumalaka", trackArtwork = "https://i1.sndcdn.com/artworks-000057356357-9tmqex-t240x240.jpg", trackDuration = 100, context = context)
 }

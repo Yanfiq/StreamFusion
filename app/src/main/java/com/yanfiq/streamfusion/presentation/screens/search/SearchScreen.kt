@@ -194,10 +194,10 @@ fun SearchTabLayout(audiusSearchData: SearchData,
             modifier = Modifier.weight(1f)
         ) { page ->
             when (page) {
-                0 -> SearchResultScreen(isLoading = audiusSearchData.isLoading, message = audiusSearchData.message, result = audiusSearchData.result){Track -> onPlayClick(Track, StreamingPlatform.AUDIUS)}
-                1 -> SearchResultScreen(isLoading = soundcloudSearchData.isLoading, message = soundcloudSearchData.message, result = soundcloudSearchData.result){Track -> onPlayClick(Track, StreamingPlatform.SOUNDCLOUD)}
-                2 -> SearchResultScreen(isLoading = spotifySearchData.isLoading, message = spotifySearchData.message, result = spotifySearchData.result){Track -> onPlayClick(Track, StreamingPlatform.SPOTIFY)}
-                3 -> SearchResultScreen(isLoading = youtubeSearchData.isLoading, message = youtubeSearchData.message, result = youtubeSearchData.result){Track -> onPlayClick(Track, StreamingPlatform.YOUTUBE)}
+                0 -> SearchResultScreen(isLoading = audiusSearchData.isLoading, message = audiusSearchData.message, result = audiusSearchData.result){track -> onPlayClick(track, StreamingPlatform.AUDIUS)}
+                1 -> SearchResultScreen(isLoading = soundcloudSearchData.isLoading, message = soundcloudSearchData.message, result = soundcloudSearchData.result){track -> onPlayClick(track, StreamingPlatform.SOUNDCLOUD)}
+                2 -> SearchResultScreen(isLoading = spotifySearchData.isLoading, message = spotifySearchData.message, result = spotifySearchData.result){track -> onPlayClick(track, StreamingPlatform.SPOTIFY)}
+                3 -> SearchResultScreen(isLoading = youtubeSearchData.isLoading, message = youtubeSearchData.message, result = youtubeSearchData.result){track -> onPlayClick(track, StreamingPlatform.YOUTUBE)}
             }
         }
     }
@@ -268,7 +268,6 @@ fun ListItem(title: String, artist: String, durationInSeconds: Int, thumbnail_ur
 @Preview(showBackground = true)
 @Composable
 fun SearchScreenPreview_loaded() {
-    val context = LocalContext.current
     val navController = rememberNavController()
     val tracks = listOf(
         Track("", "Test1", "Test1", 63, ""),
@@ -286,10 +285,10 @@ fun SearchScreenPreview_loaded() {
         youtubeSearchData = youtubeSearchData,
         navController = navController,
         onSearchClick = { query ->
-            Toast.makeText(context, "searching $query", Toast.LENGTH_SHORT).show()
+
         },
         onPlayClick = {track, platform ->
-            Toast.makeText(context, "Playing ${track.tractTitle}", Toast.LENGTH_SHORT).show()
+
         }
     )
 }

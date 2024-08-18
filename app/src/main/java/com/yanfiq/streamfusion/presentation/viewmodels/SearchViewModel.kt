@@ -105,13 +105,13 @@ class SearchViewModel (
     }
 
     fun playTrack(context: Context, track: Track, platform: StreamingPlatform) {
-
         when(platform){
             StreamingPlatform.AUDIUS -> {
                 val explicitIntent = Intent(context, PlayAudiusActivity::class.java)
                 explicitIntent.putExtra("TRACK_ID", track.trackId)
                 explicitIntent.putExtra("TRACK_TITLE", track.tractTitle)
                 explicitIntent.putExtra("TRACK_ARTIST", track.trackArtist)
+                explicitIntent.putExtra("TRACK_DURATION", track.durationInSeconds)
                 explicitIntent.putExtra("TRACK_ARTWORK", track.trackArtworkUrl)
                 startActivity(context, explicitIntent, null)
             }
@@ -119,6 +119,7 @@ class SearchViewModel (
                 val explicitIntent = Intent(context, PlaySoundcloudActivity::class.java)
                 explicitIntent.putExtra("TRACK_TITLE", track.tractTitle)
                 explicitIntent.putExtra("TRACK_ARTIST", track.trackArtist)
+                explicitIntent.putExtra("TRACK_DURATION", track.durationInSeconds)
                 explicitIntent.putExtra("TRACK_ARTWORK", track.trackArtworkUrl)
                 explicitIntent.putExtra("TRACK_URL", track.trackId)
                 startActivity(context, explicitIntent, null)
