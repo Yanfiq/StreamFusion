@@ -88,7 +88,7 @@ fun AudiusPlayScreen(
     var isPlayerReady by remember { mutableStateOf(false) }
 
     LaunchedEffect(trackId) {
-        playTrack(trackId, mediaPlayer, context){ result ->
+        audiusPlayer(trackId, mediaPlayer, context){ result ->
             isPlayerReady = true
         }
         while (true) {
@@ -122,14 +122,16 @@ fun AudiusPlayScreen(
             isPaused = false
             mediaPlayer.start()
                  },
-        onSeek = { newValue ->
-            sliderPosition = newValue.toFloat()
-            mediaPlayer.seekTo(newValue * 1000)
+        onSeek = { _isSeeking,_newValue ->
+            sliderPosition = _newValue.toFloat()
+            if(!_isSeeking){
+                mediaPlayer.seekTo(sliderPosition.toInt())
+            }
         }
     )
 }
 
-private fun playTrack(trackId: String, mediaPlayer: MediaPlayer, context: Context, onResult: (Float) -> Unit) {
+private fun audiusPlayer(trackId: String, mediaPlayer: MediaPlayer, context: Context, onResult: (Float) -> Unit) {
     AudiusEndpointUtil.getApiInstance()?.streamTrack(trackId)
         ?.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {

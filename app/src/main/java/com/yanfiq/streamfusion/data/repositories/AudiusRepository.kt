@@ -13,4 +13,9 @@ interface AudiusRepository {
                        onProgress: (message: String) -> Unit,
                        onResults: (List<Track>) -> Unit
     )
+
+    suspend fun getTrending(limit: Int,
+                            onProgress: (message: String) -> Unit,
+                            onResults: (List<Track>) -> Unit
+    )
 }

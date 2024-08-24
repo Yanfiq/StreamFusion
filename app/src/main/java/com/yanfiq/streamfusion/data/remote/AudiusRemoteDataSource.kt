@@ -72,4 +72,49 @@ class AudiusRemoteDataSource: AudiusRepository {
             }
         }
     }
+
+    override suspend fun getTrending(
+        limit: Int,
+        onProgress: (message: String) -> Unit,
+        onResults: (List<Track>) -> Unit
+    ) {
+        if(AudiusEndpointUtil.getUsedEndpoint() != null){
+            val api = AudiusEndpointUtil.getApiInstance()
+            api?.getTrendingTracks(limit)?.enqueue(object : Callback<AudiusResponse> {
+                override fun onResponse(
+                    call: Call<AudiusResponse>,
+                    response: Response<AudiusResponse>
+                ) {
+                    if (response.isSuccessful) {
+                        val tracks = response.body()?.data ?: emptyList()
+                        onResults(tracks.map { Track(it.id, it.title, it.user.name, it.duration, it.artwork.medium) })
+                    } else {
+                        Log.d("AudiusTrending", "Response not successful: ${response.errorBody()?.string()}")
+                        onProgress("Response not successful: ${response.errorBody()?.string()}")
+                        onResults(emptyList())
+                    }
+                }
+
+                override fun onFailure(call: Call<AudiusResponse>, t: Throwable) {
+                    Log.d("AudiusSearch", "API call failed: ${t.message}")
+                    onProgress("API call failed: ${t.message}")
+                    onResults(emptyList())
+//                    if(retryCount < 3){
+//                        apiStatus.updateAudiusApiReady(false)
+//                        CoroutineScope(Dispatchers.IO).launch {
+//                            onProgress("Re-fetching endpoints")
+//                            AudiusEndpointUtil.initialize(context, apiStatus)
+//                            onProgress("Trying again using ${AudiusEndpointUtil.getUsedEndpoint().toString()}")
+//                            search(query, limit, context, apiStatus, retryCount+1, onProgress = {message-> onProgress(message) }, onResults = {results -> onResults(results)})
+//                        }
+//                    }else{
+//                        onResults(emptyList())
+//                    }
+                }
+
+            })
+        }
+    }
+
+
 }

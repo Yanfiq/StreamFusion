@@ -59,16 +59,16 @@ class SearchViewModel (
             _searchScreenData.update { it.copy(youtubeSearchData = SearchData(isLoading = true)) }
         }
 
-        viewModelScope.launch {
-            searchUseCase.searchAudius(searchQuery, limit, context, apiStatus, 0,
-                onProgress = { message ->
-                    _searchScreenData.update { it.copy(audiusSearchData = _searchScreenData.value.audiusSearchData.copy(message = message)) }
-                },
-                onResults = { results ->
-                    _searchScreenData.update { it.copy(audiusSearchData = SearchData(result = results, false)) }
-                }
-            )
-        }
+//        viewModelScope.launch {
+//            searchUseCase.searchAudius(searchQuery, limit, context, apiStatus, 0,
+//                onProgress = { message ->
+//                    _searchScreenData.update { it.copy(audiusSearchData = _searchScreenData.value.audiusSearchData.copy(message = message)) }
+//                },
+//                onResults = { results ->
+//                    _searchScreenData.update { it.copy(audiusSearchData = SearchData(result = results, false)) }
+//                }
+//            )
+//        }
 
         viewModelScope.launch {
             searchUseCase.searchSoundcloud(searchQuery, limit, context,
@@ -81,27 +81,27 @@ class SearchViewModel (
             )
         }
 
-        viewModelScope.launch {
-            searchUseCase.searchSpotify(searchQuery, limit, context, spotifyClientId, spotifyClientSecret,
-                onProgress = { message ->
-                    _searchScreenData.update { it.copy(spotifySearchData = _searchScreenData.value.spotifySearchData.copy(message = message)) }
-                },
-                onResults = { results ->
-                    _searchScreenData.update { it.copy(spotifySearchData = SearchData(result = results, isLoading = false)) }
-                }
-            )
-        }
-
-        viewModelScope.launch {
-            searchUseCase.searchYoutube(searchQuery, limit, context, youtubeKey,
-                onProgress = { message ->
-                    _searchScreenData.update { it.copy(youtubeSearchData = _searchScreenData.value.youtubeSearchData.copy(message = message)) }
-                },
-                onResults = { results ->
-                    _searchScreenData.update { it.copy(youtubeSearchData = SearchData(result = results, isLoading = false)) }
-                }
-            )
-        }
+//        viewModelScope.launch {
+//            searchUseCase.searchSpotify(searchQuery, limit, context, spotifyClientId, spotifyClientSecret,
+//                onProgress = { message ->
+//                    _searchScreenData.update { it.copy(spotifySearchData = _searchScreenData.value.spotifySearchData.copy(message = message)) }
+//                },
+//                onResults = { results ->
+//                    _searchScreenData.update { it.copy(spotifySearchData = SearchData(result = results, isLoading = false)) }
+//                }
+//            )
+//        }
+//
+//        viewModelScope.launch {
+//            searchUseCase.searchYoutube(searchQuery, limit, context, youtubeKey,
+//                onProgress = { message ->
+//                    _searchScreenData.update { it.copy(youtubeSearchData = _searchScreenData.value.youtubeSearchData.copy(message = message)) }
+//                },
+//                onResults = { results ->
+//                    _searchScreenData.update { it.copy(youtubeSearchData = SearchData(result = results, isLoading = false)) }
+//                }
+//            )
+//        }
     }
 
     fun playTrack(context: Context, track: Track, platform: StreamingPlatform) {

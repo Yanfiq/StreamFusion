@@ -94,6 +94,7 @@ fun SoundcloudPlayScreen(
     context: Context
 ) {
     var isPaused by remember { mutableStateOf(true) }
+    var isSeeking by remember { mutableStateOf(false) }
     var sliderPosition by remember { mutableStateOf(0f) }
     var isPlayerReady by remember { mutableStateOf(false) }
     var webView by remember { mutableStateOf<WebView?>(null) }
@@ -106,7 +107,9 @@ fun SoundcloudPlayScreen(
                 webView = _webView
             },
             returnElapsedTime = {elapsedTime ->
-                sliderPosition = elapsedTime
+                if(!isSeeking){
+                    sliderPosition = elapsedTime
+                }
             },
             onReady = {
                 isPlayerReady = true
@@ -137,9 +140,12 @@ fun SoundcloudPlayScreen(
             isPaused = false
             webView?.evaluateJavascript("SC.Widget(document.getElementById('soundcloud_widget')).toggle()", null)
                  },
-        onSeek = {newValue ->
-            sliderPosition = newValue.toFloat()
-            webView?.evaluateJavascript("SC.Widget(document.getElementById('soundcloud_widget')).seekTo(${sliderPosition * 1000f})", null)
+        onSeek = {_isSeeking, _newValue ->
+            sliderPosition = _newValue.toFloat()
+            isSeeking = _isSeeking
+            if(!_isSeeking){
+                webView?.evaluateJavascript("SC.Widget(document.getElementById('soundcloud_widget')).seekTo(${sliderPosition * 1000f})", null)
+            }
         }
     )
 }

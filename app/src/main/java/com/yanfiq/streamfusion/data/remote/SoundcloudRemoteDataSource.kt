@@ -150,4 +150,113 @@ class SoundcloudRemoteDataSource: SoundcloudRepository {
             rootView.addView(frameLayout)
         }
     }
+
+    override suspend fun getTrending(limit: Int, context: Context, onProgress: (String) -> Unit, onResults: (List<Track>) -> Unit) {
+        val url = "https://m.soundcloud.com/discover/sets/charts-top:all-music"
+
+        // Create a FrameLayout to hold the WebView
+        val frameLayout = FrameLayout(context).apply {
+            layoutParams = ViewGroup.LayoutParams(1, 1) // Smallest size possible to be hidden
+        }
+
+        val webView = WebView(context).apply {
+            layoutParams = ViewGroup.LayoutParams(1200, 2000)
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.loadWithOverviewMode = true
+            settings.useWideViewPort = true
+            webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    evaluateJavascript(
+                        """
+                        (function(){
+                            let result_desired = ${limit};
+                            let result_acquired = 0;
+
+                            let interval = setInterval(
+                                function (){
+                                    let list = document.querySelector('.List_VerticalList__2uQYU');
+                                    let loadingMoreTracks = document.querySelector('.LazyLoadingList_InlineLoadingMessage__2DOT2');
+                                    result_acquired = list.getElementsByTagName('li').length;
+                                    Android2.returnMessage(`Getting results ${'$'}{result_acquired}/${limit}`)
+                                    console.log(result_acquired+' | '+loadingMoreTracks.innerText);
+                                    if(result_acquired >= result_desired || loadingMoreTracks.innerText.includes('')){
+                                        Android1.returnPage(document.documentElement.outerHTML);
+                                        clearInterval(interval);
+                                    }
+                                    loadingMoreTracks.scrollIntoView({
+                                        block: 'center'
+                                    });
+                                },
+                                3000
+                            )
+                        })();
+                        """.trimIndent()
+                    ) { }
+                }
+
+                override fun onReceivedError(
+                    view: WebView?,
+                    request: WebResourceRequest?,
+                    error: WebResourceError?
+                ) {
+                    super.onReceivedError(view, request, error)
+                }
+
+                override fun onReceivedHttpError(
+                    view: WebView?,
+                    request: WebResourceRequest?,
+                    errorResponse: WebResourceResponse?
+                ) {
+                    super.onReceivedHttpError(view, request, errorResponse)
+                }
+            }
+            addJavascriptInterface(JsInterface1 { value ->
+                Log.d("SoundcloudSearch", "Javascript interface called")
+                (context as Activity).runOnUiThread {
+                    val doc: Document = Ksoup.parse(value)
+                    val songsWrapper: Element? = doc.select(".List_VerticalList__2uQYU").first()
+                    if (songsWrapper != null) {
+                        val songs: Elements = songsWrapper.select("li")
+                        val tracks: MutableList<Track> = mutableListOf()
+                        songs.forEach { song: Element ->
+                            val title: String = song.select(".Information_CellTitle__2KitR").html()
+                            val artist: String = song.select(".Information_CellSubtitle__1mXGx").html()
+                            val image: String = song.select("img").attr("src")
+                            val streamUrl: String = song.select("a").attr("href")
+                            val durationRaw: String = song.select(".Metadata_MetadataLabel__3GU8Y")[1].html()
+                            val duration: Int = (durationRaw.substring(0, durationRaw.indexOf(':')).toInt() * 60) + (durationRaw.substring(durationRaw.indexOf(':')+1).toInt())
+                            val track = Track("https://soundcloud.com$streamUrl", title, artist, duration, image)
+                            tracks.add(track)
+                            Log.d("SoundcloudSearch", title)
+                        }
+                        onResults(tracks)
+                    }
+                    Handler(Looper.getMainLooper()).post {
+                        (context as Activity).runOnUiThread {
+                            val rootView = (context as Activity).findViewById<ViewGroup>(R.id.content)
+                            rootView.removeView(frameLayout)
+                            destroy()
+                        }
+                    }
+                }
+            }, "Android1")
+            addJavascriptInterface(JsInterface2 { value ->
+                onProgress(value)
+            }, "Android2")
+            loadUrl(url)
+            visibility = View.INVISIBLE
+            isClickable = false
+            isFocusable = false
+        }
+
+        // Add the WebView to the FrameLayout
+        frameLayout.addView(webView)
+
+        // Create a root view (e.g., a LinearLayout) to attach the FrameLayout to the activity's content view
+        (context as Activity).runOnUiThread {
+            val rootView = (context as Activity).findViewById<ViewGroup>(android.R.id.content)
+            rootView.addView(frameLayout)
+        }
+    }
 }

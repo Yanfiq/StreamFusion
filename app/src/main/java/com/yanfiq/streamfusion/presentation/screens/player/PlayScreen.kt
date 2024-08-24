@@ -3,8 +3,17 @@ package com.yanfiq.streamfusion.presentation.screens.player
 import android.content.Context
 import android.media.MediaPlayer
 import android.util.Log
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -56,7 +65,13 @@ import androidx.compose.foundation.interaction.MutableInteractionSource;
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.DpSize
 
@@ -75,8 +90,9 @@ fun PlayScreen(
     isPlaying: Boolean,
     onPause: () -> Unit,
     onPlay: () -> Unit,
-    onSeek: (Int) -> Unit
+    onSeek: (Boolean, Int) -> Unit
 ) {
+    var sliderValue by remember { mutableStateOf(trackElapsedTime) }
     AppTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -99,20 +115,16 @@ fun PlayScreen(
                     Text(text = trackTitle, style = MaterialTheme.typography.titleLarge)
                     Text(text = trackArtist, style = MaterialTheme.typography.titleMedium)
                 }
-                Slider(value = trackElapsedTime.toFloat(),
-                    onValueChange = { newValue ->
-                        onSeek(newValue.toInt())
+                Spacer(modifier = Modifier.height(10.dp))
+                SliderWithoutThumb(
+                    value = trackElapsedTime.toFloat(),
+                    maxValue = trackDuration.toFloat(),
+                    onValueChange = {newValue ->
+                        sliderValue = newValue.toInt()
                     },
-                    thumb = {
-                        SliderDefaults.Thumb( //androidx.compose.material3.SliderDefaults
-                            interactionSource = interactionSource,
-                            thumbSize = DpSize(0.dp, 0.dp)
-                        )
-                    },
-                    valueRange = 0f..trackDuration.toFloat(),
-                    enabled = isPlayerReady,
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    isSeeking = {value ->
+                        onSeek(value, sliderValue)
+                    }
                 )
                 Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                     val elapsed_minutes: Int = (trackElapsedTime/60f).toInt()
@@ -155,11 +167,132 @@ fun PlayScreenPreview(){
         trackArtist = "Test",
         trackArtwork = "",
         trackDuration = 100,
-        trackElapsedTime = 90,
+        trackElapsedTime = 59,
         isPlayerReady = true,
         isPlaying = false,
         onPause = { /*TODO*/ },
-        onPlay = { /*TODO*/ }) {
-        
+        onPlay = { /*TODO*/ },
+        onSeek = {a, b -> })
+}
+
+@Composable
+private fun SliderWithoutThumb(value: Float, maxValue: Float, onValueChange: (Float) -> Unit, isSeeking: (Boolean) -> Unit) {
+    BoxWithConstraints ( //container
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(7.5.dp),
+        contentAlignment = Alignment.Center
+    ){
+        val sliderActiveWidth = maxWidth * value/maxValue
+        val sliderMaxWidth = maxWidth * 1f
+        Box(
+            modifier = Modifier
+                .clip(
+                    RoundedCornerShape(
+                        topStart = 10.dp,
+                        topEnd = 10.dp,
+                        bottomStart = 10.dp,
+                        bottomEnd = 10.dp
+                    )
+                )
+                .background(MaterialTheme.colorScheme.secondaryContainer)
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .pointerInput(Unit) {
+                    detectDragGestures(
+                        onDragStart = { offset ->
+                            val xInDp = offset.x.toDp()
+                            val newValue = xInDp / sliderMaxWidth * maxValue
+                            isSeeking(true)
+                            onValueChange(newValue)
+                        },
+                        onDragEnd = {
+                            isSeeking(false)
+                        },
+                        onDrag = { change, dragAmount ->
+                            val currentPosition = change.position
+                            val xInDp = currentPosition.x.toDp()
+                            val newValue = xInDp / sliderMaxWidth * maxValue
+                            isSeeking(true)
+                            onValueChange(newValue)
+                            change.consume()
+                        }
+                    )
+                }
+                .pointerInput(Unit){
+                    detectTapGestures(
+                        onTap = {offset ->
+                            val xInDp = offset.x.toDp()
+                            val newValue = xInDp / sliderMaxWidth * maxValue
+                            isSeeking(false)
+                            onValueChange(newValue)
+                        }
+                    )
+                },
+            contentAlignment = Alignment.TopStart
+        ) {
+            Box(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.primary)
+                    .width(sliderActiveWidth)
+                    .fillMaxHeight()
+            )
+        }
     }
+}
+
+@Composable
+@Preview
+private fun sliderPreview(){
+    var value by remember { mutableStateOf(50f)}
+    val maxValue = 100f
+
+    Box (
+        modifier = Modifier
+            .width(150.dp)
+            .height(25.dp)
+            .background(Color.White)
+            .padding(10.dp)
+    ){
+        SliderWithoutThumb(value = value, maxValue = maxValue,
+            onValueChange = {newValue ->
+                value = newValue
+            },
+            isSeeking = {})
+    }
+}
+
+@Composable
+fun TransitionAnimationDemo() {
+    var selected by remember { mutableStateOf(false) }
+
+    val transition = updateTransition(targetState = selected, label = "BoxTransition")
+
+    val color by transition.animateColor(label = "ColorAnimation") { state ->
+        if (state) Color.Green else Color.Gray
+    }
+
+    val size by transition.animateDp(label = "SizeAnimation") { state ->
+        if (state) 100.dp else 50.dp
+    }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Button(onClick = { selected = !selected }) {
+            Text("Toggle")
+        }
+
+        Box(
+            modifier = Modifier
+                .size(size)
+                .background(color)
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PreviewTransitionAnimationDemo() {
+    TransitionAnimationDemo()
 }
